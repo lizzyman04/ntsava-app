@@ -1,0 +1,20 @@
+CREATE TABLE IF NOT EXISTS files (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT UNSIGNED NOT NULL,
+    uuid CHAR(36) NOT NULL UNIQUE,
+    storage_path VARCHAR(500) NULL,
+    original_name VARCHAR(255) NOT NULL,
+    size_bytes BIGINT UNSIGNED NOT NULL,
+    mime_type VARCHAR(100) NOT NULL,
+    width INT UNSIGNED NULL,
+    height INT UNSIGNED NULL,
+    duration_seconds INT UNSIGNED NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL,
+    INDEX idx_user_id (user_id),
+    INDEX idx_storage_path (storage_path(191)),
+    INDEX idx_created_at (created_at),
+    INDEX idx_deleted_at (deleted_at),
+    INDEX idx_uuid (uuid),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);

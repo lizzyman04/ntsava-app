@@ -25,12 +25,13 @@
     },
     "autoload": {
         "psr-4": {
-            "App\\": "src/",
-            "Core\\": "app/core/"
+            "Source\\": "src/",
+            "App\\": "app/"
         }
     },
     "scripts": {
-        "migrate": "php db/schema.php",
+        "migrate": "php db/scripts/migrate-all.php",
+        "migrate:run": "php db/scripts/migrate.php",
         "dev": "php -S localhost:8000 -t public",
         "prod": "php -S 0.0.0.0:8000 -t public",
         "test": "phpunit"
