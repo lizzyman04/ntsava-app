@@ -1,6 +1,6 @@
 /* ============================================
-   CDN App - Modern Design System
-   Glassmorphism + Animations + Dark Mode
+   Ntsava App - Modern Design System
+   Glassmorphism + Animations
 ============================================ */
 
 /* CSS Variables */
@@ -58,13 +58,6 @@
     --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
-/* Dark Mode */
-.dark {
-    --glass-bg: rgba(31, 41, 55, 0.8);
-    --glass-border: rgba(255, 255, 255, 0.05);
-    --gradient-hero: linear-gradient(135deg, #1f2937 0%, #111827 100%);
-}
-
 /* Base Styles */
 * {
     margin: 0;
@@ -76,13 +69,7 @@ body {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     background: var(--gray-50);
     color: var(--gray-900);
-    transition: background-color 0.3s, color 0.3s;
     scroll-behavior: smooth;
-}
-
-.dark body {
-    background: var(--gray-900);
-    color: var(--gray-100);
 }
 
 /* Glassmorphism Components */
@@ -166,11 +153,6 @@ body {
     transition: all 0.2s;
     border: none;
     cursor: pointer;
-}
-
-.dark .btn-secondary {
-    background: var(--gray-700);
-    color: var(--gray-200);
 }
 
 .btn-secondary:hover {
@@ -313,15 +295,6 @@ body {
     background-color: rgba(245, 158, 11, 0.05);
 }
 
-.dark .modern-table th {
-    color: var(--gray-400);
-    border-bottom-color: var(--gray-700);
-}
-
-.dark .modern-table td {
-    border-bottom-color: var(--gray-800);
-}
-
 /* File Item Animation */
 .file-item {
     animation: slideIn 0.3s var(--ease-out);
@@ -353,10 +326,6 @@ body {
     z-index: 1000;
     animation: slideInRight 0.3s var(--ease-out);
     border-left: 4px solid;
-}
-
-.dark .toast {
-    color: white;
 }
 
 .toast.success { border-left-color: var(--success); }
@@ -455,6 +424,22 @@ body {
     background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
     background-size: 40px 40px;
     animation: float 20s linear infinite;
+}
+
+/* User Dropdown Styles */
+#user-dropdown {
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+    transform-origin: top right;
+}
+
+#user-dropdown.visible {
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+#user-dropdown.invisible {
+    visibility: hidden !important;
+    opacity: 0 !important;
 }
 
 @keyframes float {

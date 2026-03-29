@@ -20,11 +20,21 @@ $totalFiles = 0;
 $credits = 0;
 
 if ($userObj) {
-    $fileRepo = ORMHelper::getRepository(\Source\Models\File::class);
-    $totalFiles = count($fileRepo->findAll(['userId' => $userObj->getId(), 'deletedAt' => null]));
-    $creditRepo = ORMHelper::getRepository(\Source\Models\Credit::class);
-    $creditsObj = $creditRepo->findOne(['userId' => $userObj->getId()]);
-    $credits = $creditsObj ? $creditsObj->getAmount() : 0;
+    $allFiles = ORMHelper::findAll(\Source\Models\File::class);
+    $totalFiles = 0;
+    foreach ($allFiles as $f) {
+        if ($f->getUserId() === $userObj->getId() && !$f->isDeleted()) {
+            $totalFiles++;
+        }
+    }
+    
+    $allCredits = ORMHelper::findAll(\Source\Models\Credit::class);
+    foreach ($allCredits as $c) {
+        if ($c->getUserId() === $userObj->getId()) {
+            $credits = $c->getAmount();
+            break;
+        }
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -33,7 +43,7 @@ if ($userObj) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title><?= View::yield('title', 'Dashboard') ?> - CDN App</title>
+    <title><?= View::yield('title', 'Dashboard') ?> - Ntsava</title>
 
     <!-- Tailwind CSS -->
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
@@ -60,7 +70,7 @@ if ($userObj) {
     <meta name="csrf-token" content="<?= Auth::csrfToken() ?>">
 </head>
 
-<body class="bg-gray-50 dark:bg-gray-950">
+<body class="bg-gray-50">
     <?php component('sidebar', [
         'user' => $userData,
         'total_files' => $totalFiles,
@@ -68,6 +78,7 @@ if ($userObj) {
         'active_menu' => View::yield('active_menu'),
         'is_admin' => $isAdmin
     ]); ?>
+    <?php component('mobile-sidebar', ['user' => $userData]); ?>
 
     <div class="lg:ml-72 min-h-screen">
         <?php component('header', ['user' => $userData]); ?>

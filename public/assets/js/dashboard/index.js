@@ -7,20 +7,25 @@ $(document).ready(function () {
         if (!confirm('Are you sure you want to delete this file?')) {
             return;
         }
-
         $.ajax({
-            url: '/api/v1/delete',
+            url: '/dashboard/files/' + uuid,
             method: 'DELETE',
             headers: {
-                'X-User-UUID': $('#user-uuid').data('uuid'),
-                'X-Token': $('#api-token').data('token')
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             },
-            data: { uuid: uuid },
-            success: function () {
-                window.location.reload();
+            success: function (response) {
+                if (response.success) {
+                    window.Toast.show('File deleted successfully', 'success');
+                    setTimeout(function () {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    window.Toast.show(response.message || 'Failed to delete file', 'error');
+                }
             },
-            error: function () {
-                window.Toast.show('Failed to delete file', 'error');
+            error: function (xhr) {
+                var response = xhr.responseJSON;
+                window.Toast.show(response?.message || 'Failed to delete file', 'error');
             }
         });
     };

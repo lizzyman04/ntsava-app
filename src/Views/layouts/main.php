@@ -1,5 +1,5 @@
-<?php use Fluxor\View;
-// Load helpers
+<?php 
+use Fluxor\View;
 require_once __DIR__ . '/../components/helpers.php';
 ?>
 <!DOCTYPE html>
@@ -8,7 +8,7 @@ require_once __DIR__ . '/../components/helpers.php';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title><?= View::yield('title', 'CDN App') ?> - CDN Personal</title>
+    <title><?= View::yield('title', 'Ntsava') ?> - Ntsava</title>
 
     <!-- Tailwind CSS -->
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
@@ -35,14 +35,17 @@ require_once __DIR__ . '/../components/helpers.php';
     <meta name="csrf-token" content="<?= \App\Core\Auth::csrfToken() ?>">
 </head>
 
-<body class="bg-gray-50 dark:bg-gray-950">
+<body class="bg-gray-50">
     <?php component('header', ['user' => \App\Core\Auth::user()]); ?>
+    <?php component('mobile-sidebar', ['user' => \App\Core\Auth::user()]); ?>
 
-    <main class="container mx-auto px-4 py-8">
+    <main class="container mx-auto px-4 py-8 min-h-screen">
         <?= View::yield('content') ?>
     </main>
 
     <?php component('footer'); ?>
+    
+    <div id="toast" style="display: none;" class="toast"></div>
 
     <?= View::yield('scripts') ?>
 </body>

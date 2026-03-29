@@ -10,10 +10,15 @@ class FilesController extends DashboardController
 {
     public function index()
     {
-        $fileRepo = ORMHelper::getRepository(File::class);
-        $files = $fileRepo->findAll(['userId' => $this->user->getId(), 'deletedAt' => null]);
-
-        // Sort by created_at DESC manually
+        $allFiles = ORMHelper::findAll(File::class);
+        $files = [];
+        
+        foreach ($allFiles as $file) {
+            if ($file->getUserId() === $this->user->getId() && !$file->isDeleted()) {
+                $files[] = $file;
+            }
+        }
+        
         usort($files, function ($a, $b) {
             return $b->getCreatedAt() <=> $a->getCreatedAt();
         });
@@ -29,23 +34,26 @@ class FilesController extends DashboardController
 
     public function delete($uuid)
     {
-        $fileRepo = ORMHelper::getRepository(File::class);
-        $file = $fileRepo->findOne(['userId' => $this->user->getId(), 'uuid' => $uuid]);
+        $allFiles = ORMHelper::findAll(File::class);
+        $file = null;
+        
+        foreach ($allFiles as $f) {
+            if ($f->getUserId() === $this->user->getId() && $f->getUuid() === $uuid) {
+                $file = $f;
+                break;
+            }
+        }
 
         if (!$file) {
             return Response::error('File not found', 404);
         }
 
-        // Delete physical file
         $absolutePath = base_path('storage/' . $file->getStoragePath());
         if (file_exists($absolutePath)) {
             unlink($absolutePath);
         }
 
-        // Soft delete record
         $file->delete();
-
-        // Update user storage
         $this->user->subtractStorageUsedBytes($file->getSizeBytes());
 
         $entityManager = ORMHelper::getManager();

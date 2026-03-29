@@ -1,0 +1,117 @@
+/* ============================================
+   Auth Pages - Custom Styles
+============================================ */
+
+/* Auth Container */
+.auth-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, var(--primary-50) 0%, var(--primary-100) 100%);
+}
+
+.auth-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    border-radius: 1.5rem;
+    box-shadow: var(--shadow-xl);
+    padding: 2rem;
+    max-width: 50rem;
+    width: 100%;
+    animation: fadeInUp 0.5s var(--ease-out);
+    border: 1px solid var(--glass-border);
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Illustration Side */
+.auth-illustration {
+    background: var(--gradient-primary);
+    position: relative;
+    overflow: hidden;
+    border-radius: 1.5rem;
+}
+
+.auth-illustration::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+    background-size: 40px 40px;
+    animation: float 20s linear infinite;
+}
+
+@keyframes float {
+    from { transform: translate(0, 0); }
+    to { transform: translate(40px, 40px); }
+}
+
+/* Form Elements */
+.input-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gray-400);
+    pointer-events: none;
+}
+
+.input-field-with-icon {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 2.5rem;
+    border: 1px solid var(--gray-300);
+    border-radius: 0.75rem;
+    transition: all 0.2s var(--ease-out);
+    background: white;
+}
+
+.input-field-with-icon:focus {
+    outline: none;
+    border-color: var(--primary-500);
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+}
+
+/* Password Strength Meter */
+.strength-bar {
+    height: 4px;
+    transition: all 0.3s var(--ease-out);
+    border-radius: 2px;
+}
+
+.strength-text {
+    font-size: 0.75rem;
+    transition: color 0.3s var(--ease-out);
+}
+
+/* Feature Items */
+.feature-item {
+    transition: all 0.3s var(--ease-out);
+}
+
+.feature-item:hover {
+    transform: translateX(8px);
+}
+
+/* Plan Badge */
+.plan-badge {
+    background: var(--gradient-primary);
+}
+
+/* Remember Me Checkbox */
+.remember-checkbox {
+    width: 1rem;
+    height: 1rem;
+    color: var(--primary-500);
+    border-radius: 0.25rem;
+    border-color: var(--gray-300);
+}

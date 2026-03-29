@@ -4,15 +4,17 @@
 
 $(document).ready(function () {
     window.upgradePlan = function (planSlug) {
-        if (!confirm('Upgrade to ' + planSlug.toUpperCase() + ' plan?')) {
+        if (!confirm('Upgrade to ' + planSlug.toUpperCase() + ' plan? This will use your credits.')) {
             return;
         }
+
+        var csrfToken = $('meta[name="csrf-token"]').attr('content');
 
         $.ajax({
             url: '/dashboard/credits/upgrade/' + planSlug,
             method: 'POST',
             headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                'X-CSRF-TOKEN': csrfToken
             },
             success: function (response) {
                 if (response.success) {

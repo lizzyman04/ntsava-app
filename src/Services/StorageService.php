@@ -11,9 +11,8 @@ class StorageService
     public function upload(User $user, array $file, string $path = ''): array
     {
         try {
-            // Validate file
             if ($file['error'] !== UPLOAD_ERR_OK) {
-                return ['success' => false, 'error' => 'Upload error: ' . $file['error']];
+                return ['success' => false, 'error' => 'Upload error: ' . $this->getUploadErrorMessage($file['error'])];
             }
 
             $maxSize = (int) env('UPLOAD_MAX_SIZE', 104857600);
@@ -23,138 +22,160 @@ class StorageService
 
             $allowedTypes = explode(',', env('UPLOAD_ALLOWED_TYPES', 'jpg,jpeg,png,gif,webp,mp4,pdf'));
             $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-            
+
             if (!in_array($extension, $allowedTypes)) {
                 return ['success' => false, 'error' => "File type '{$extension}' not allowed"];
             }
 
-            // Generate storage path
             $storagePath = $user->getStoragePath();
             $relativePath = ltrim($path, '/');
-            
-            // Clean path (remove .., multiple slashes, etc)
+
             $relativePath = preg_replace('/\.\./', '', $relativePath);
             $relativePath = preg_replace('/\/+/', '/', $relativePath);
-            
-            $fullPath = $storagePath . '/' . $relativePath;
-            $absolutePath = base_path('storage/' . $fullPath);
-            
-            // Create directory if needed
+
+            $fullPath = $storagePath;
+            if (!empty($relativePath)) {
+                $fullPath .= '/' . $relativePath;
+            }
+
+            $originalName = $file['name'];
+            $nameWithoutExt = pathinfo($originalName, PATHINFO_FILENAME);
+            $extension = pathinfo($originalName, PATHINFO_EXTENSION);
+
+            $uniqueId = substr(bin2hex(random_bytes(3)), 0, 6);
+            $fileName = $nameWithoutExt . '_' . $uniqueId;
+
+            if (strlen($fileName) > 200) {
+                $fileName = substr($fileName, 0, 200);
+            }
+
+            $fileName = $fileName . '.' . $extension;
+            $fullPathWithFile = $fullPath . '/' . $fileName;
+            $absolutePath = base_path('storage/' . $fullPathWithFile);
+
             $directory = dirname($absolutePath);
             if (!is_dir($directory)) {
                 if (!mkdir($directory, 0755, true)) {
                     return ['success' => false, 'error' => 'Failed to create directory'];
                 }
             }
-            
-            // Check if file already exists
-            $exists = file_exists($absolutePath);
-            if ($exists && !$this->shouldOverwrite($file)) {
-                return ['success' => false, 'error' => 'File already exists'];
-            }
-            
-            // Move file
+
             if (!move_uploaded_file($file['tmp_name'], $absolutePath)) {
                 return ['success' => false, 'error' => 'Failed to save file'];
             }
-            
-            // Create file record
+
             $fileEntity = new File(
                 $user->getId(),
-                $file['name'],
+                $originalName,
                 $file['size'],
                 mime_content_type($absolutePath)
             );
-            $fileEntity->setStoragePath($fullPath);
-            
-            // Get image dimensions if image
+            $fileEntity->setStoragePath($fullPathWithFile);
+
             if (str_starts_with($fileEntity->getMimeType(), 'image/')) {
                 $dimensions = getimagesize($absolutePath);
                 if ($dimensions) {
                     $fileEntity->setDimensions($dimensions[0], $dimensions[1]);
                 }
             }
-            
+
             $entityManager = ORMHelper::getManager();
             $entityManager->persist($fileEntity);
-            
-            // Update user storage usage
+
             $user->addStorageUsedBytes($file['size']);
             $entityManager->persist($user);
-            
+
             $entityManager->run();
-            
+
+            $publicUrl = $user->getPublicUrl($relativePath ? $relativePath . '/' . $fileName : $fileName);
+
             return [
                 'success' => true,
-                'url' => $user->getPublicUrl($relativePath),
+                'url' => $publicUrl,
                 'uuid' => $fileEntity->getUuid(),
                 'size' => $file['size'],
                 'mime' => $fileEntity->getMimeType(),
-                'path' => $relativePath
+                'path' => $relativePath ? $relativePath . '/' . $fileName : $fileName
             ];
-            
+
         } catch (\Exception $e) {
             return ['success' => false, 'error' => $e->getMessage()];
         }
     }
-    
+
+    private function getUploadErrorMessage($code): string
+    {
+        switch ($code) {
+            case UPLOAD_ERR_INI_SIZE:
+                return 'The uploaded file exceeds the upload_max_filesize directive in php.ini';
+            case UPLOAD_ERR_FORM_SIZE:
+                return 'The uploaded file exceeds the MAX_FILE_SIZE directive in the HTML form';
+            case UPLOAD_ERR_PARTIAL:
+                return 'The uploaded file was only partially uploaded';
+            case UPLOAD_ERR_NO_FILE:
+                return 'No file was uploaded';
+            case UPLOAD_ERR_NO_TMP_DIR:
+                return 'Missing a temporary folder';
+            case UPLOAD_ERR_CANT_WRITE:
+                return 'Failed to write file to disk';
+            case UPLOAD_ERR_EXTENSION:
+                return 'A PHP extension stopped the file upload';
+            default:
+                return 'Unknown upload error';
+        }
+    }
+
     public function delete(User $user, string $pathOrUuid): array
     {
         try {
             $fileRepo = ORMHelper::getRepository(File::class);
-            
-            // Try to find by UUID first, then by path
+
             $file = $fileRepo->findOne(['userId' => $user->getId(), 'uuid' => $pathOrUuid]);
-            
+
             if (!$file) {
                 $storagePath = $user->getStoragePath() . '/' . ltrim($pathOrUuid, '/');
                 $file = $fileRepo->findOne(['userId' => $user->getId(), 'storagePath' => $storagePath]);
             }
-            
+
             if (!$file) {
                 return ['success' => false, 'error' => 'File not found'];
             }
-            
-            // Delete physical file if exists
+
             $absolutePath = base_path('storage/' . $file->getStoragePath());
             if (file_exists($absolutePath)) {
                 unlink($absolutePath);
             }
-            
-            // Soft delete record
+
             $file->delete();
-            
-            // Update user storage
             $user->subtractStorageUsedBytes($file->getSizeBytes());
-            
+
             $entityManager = ORMHelper::getManager();
             $entityManager->persist($file);
             $entityManager->persist($user);
             $entityManager->run();
-            
+
             return ['success' => true];
-            
+
         } catch (\Exception $e) {
             return ['success' => false, 'error' => $e->getMessage()];
         }
     }
-    
+
     public function getInfo(User $user, string $pathOrUuid): array
     {
         $fileRepo = ORMHelper::getRepository(File::class);
-        
-        // Try to find by UUID first, then by path
+
         $file = $fileRepo->findOne(['userId' => $user->getId(), 'uuid' => $pathOrUuid]);
-        
+
         if (!$file) {
             $storagePath = $user->getStoragePath() . '/' . ltrim($pathOrUuid, '/');
             $file = $fileRepo->findOne(['userId' => $user->getId(), 'storagePath' => $storagePath]);
         }
-        
+
         if (!$file || $file->isDeleted()) {
             return ['success' => false, 'error' => 'File not found'];
         }
-        
+
         return [
             'success' => true,
             'data' => [
@@ -172,11 +193,5 @@ class StorageService
                 'created_at' => $file->getCreatedAt()->format('Y-m-d H:i:s')
             ]
         ];
-    }
-    
-    private function shouldOverwrite(array $file): bool
-    {
-        // For now, never overwrite
-        return false;
     }
 }

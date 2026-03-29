@@ -174,4 +174,10 @@ class File
     {
         return pathinfo($this->originalName, PATHINFO_FILENAME);
     }
+
+    public function getPublicUrl(): string
+    {
+        $baseUrl = env('CDN_URL', 'https://cdn.tudocomlizzyman.com');
+        return rtrim($baseUrl, '/') . '/' . ltrim($this->storagePath, '/');
+    }
 }

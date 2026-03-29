@@ -10,23 +10,30 @@ use Fluxor\Response;
 use Source\Models\User;
 use Source\Models\UserRole;
 use Source\Models\Credit;
+use Source\Models\File;
 
 class AuthController extends Controller
 {
     public function showLogin()
     {
+        $stats = $this->getPublicStats();
+
         return Response::view('auth/login', [
             'title' => 'Login',
-            'subtitle' => 'Access your account'
+            'subtitle' => 'Access your Ntsava account',
+            'stats' => $stats
         ]);
     }
 
     public function showSignup()
     {
+        $stats = $this->getPublicStats();
+
         return Response::view('auth/signup', [
             'title' => 'Create Account',
-            'subtitle' => 'Start using our CDN service',
-            'plans' => $this->getPlans()
+            'subtitle' => 'Start using Ntsava services',
+            'plans' => $this->getPlans(),
+            'stats' => $stats
         ]);
     }
 
@@ -36,8 +43,7 @@ class AuthController extends Controller
         $password = $this->request->input('password');
         $remember = $this->request->input('remember') === 'on';
 
-        $userRepo = ORMHelper::getRepository(User::class);
-        $user = $userRepo->findOne(['email' => $email]);
+        $user = ORMHelper::findOneBy(User::class, 'email', $email);
 
         if (!$user || !password_verify($password, $user->getPasswordHash())) {
             return Response::error('Invalid email or password', 401);
@@ -72,40 +78,32 @@ class AuthController extends Controller
         $email = $this->request->input('email');
         $password = $this->request->input('password');
 
-        // Validation
         $errors = [];
 
-        if (empty($name)) {
+        if (empty($name))
             $errors['name'] = 'Name is required';
-        }
-        if (empty($username)) {
+        if (empty($username))
             $errors['username'] = 'Username is required';
-        }
-        if (empty($email)) {
+        if (empty($email))
             $errors['email'] = 'Email is required';
-        }
-        if (strlen($password) < 6) {
+        if (strlen($password) < 6)
             $errors['password'] = 'Password must be at least 6 characters';
-        }
 
-        // Validate username format (only letters, numbers, underscore, hyphen)
         if (!empty($username) && !preg_match('/^[a-zA-Z0-9_-]+$/', $username)) {
             $errors['username'] = 'Username can only contain letters, numbers, underscore and hyphen';
         }
 
-        // Validate email format
         if (!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $errors['email'] = 'Invalid email format';
         }
 
-        // Check if username exists
-        $userRepo = ORMHelper::getRepository(User::class);
-        if ($userRepo->findOne(['username' => $username])) {
+        $existingUser = ORMHelper::findOneBy(User::class, 'username', $username);
+        if ($existingUser) {
             $errors['username'] = 'Username already taken';
         }
 
-        // Check if email exists
-        if ($userRepo->findOne(['email' => $email])) {
+        $existingUser = ORMHelper::findOneBy(User::class, 'email', $email);
+        if ($existingUser) {
             $errors['email'] = 'Email already registered';
         }
 
@@ -113,15 +111,12 @@ class AuthController extends Controller
             return Response::error('Validation failed', 422, $errors);
         }
 
-        // Get Free plan (slug = 'free')
-        $planRepo = ORMHelper::getRepository(Plan::class);
-        $plan = $planRepo->findOne(['slug' => 'free']);
+        $plan = ORMHelper::findOneBy(Plan::class, 'slug', 'free');
 
         if (!$plan) {
             return Response::error('Free plan not found. Please contact administrator.', 500);
         }
 
-        // Create user with Free plan
         $user = new User();
         $user->setName($name)
             ->setUsername($username)
@@ -135,16 +130,13 @@ class AuthController extends Controller
         $entityManager->persist($user);
         $entityManager->run();
 
-        // Add default role
         $userRole = new UserRole($user->getId(), 'user');
         $entityManager->persist($userRole);
 
-        // Create credits record (0 credits initially)
         $credits = new Credit($user->getId());
         $entityManager->persist($credits);
         $entityManager->run();
 
-        // Create storage directory
         $storagePath = base_path('storage/' . $user->getStoragePath());
         if (!is_dir($storagePath)) {
             mkdir($storagePath, 0755, true);
@@ -163,13 +155,59 @@ class AuthController extends Controller
 
     private function getPlans(): array
     {
-        $planRepo = ORMHelper::getRepository(Plan::class);
-        $plans = $planRepo->findAll(['isActive' => true]);
+        $allPlans = ORMHelper::findAll(Plan::class);
+        $activePlans = [];
 
-        usort($plans, function ($a, $b) {
+        foreach ($allPlans as $plan) {
+            if ($plan->isActive()) {
+                $activePlans[] = $plan;
+            }
+        }
+
+        usort($activePlans, function ($a, $b) {
             return $a->getSortOrder() <=> $b->getSortOrder();
         });
 
-        return $plans;
+        return $activePlans;
+    }
+
+    private function getPublicStats(): array
+    {
+        $totalUsers = count(ORMHelper::findAll(User::class));
+        $allFiles = ORMHelper::findAll(File::class);
+
+        $totalFiles = 0;
+        foreach ($allFiles as $file) {
+            if (!$file->isDeleted()) {
+                $totalFiles++;
+            }
+        }
+
+        return [
+            'total_users' => $this->formatNumber($totalUsers),
+            'total_files' => $this->formatNumber($totalFiles),
+            'app_name' => 'Ntsava',
+            'tagline' => 'Everything you need, in one basket'
+        ];
+    }
+
+    private function formatNumber($number): string
+    {
+        if ($number < 100) {
+            return '~ 100';
+        }
+
+        if ($number < 1000) {
+            $rounded = ceil($number / 100) * 100;
+            return $rounded . '+';
+        }
+
+        if ($number < 5000) {
+            $rounded = ceil($number / 1000) * 1000;
+            return $rounded . '+';
+        }
+
+        $rounded = ceil($number / 1000);
+        return $rounded . 'k+';
     }
 }

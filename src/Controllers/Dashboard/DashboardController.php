@@ -15,8 +15,15 @@ abstract class DashboardController extends Controller
     public function __construct()
     {
         $this->userData = Auth::requireAuth();
-        $userRepo = ORMHelper::getRepository(User::class);
-        $this->user = $userRepo->findOne(['id' => $this->userData['id']]);
+
+        $allUsers = ORMHelper::findAll(User::class);
+        $this->user = null;
+        foreach ($allUsers as $user) {
+            if ($user->getId() === $this->userData['id']) {
+                $this->user = $user;
+                break;
+            }
+        }
 
         if (!$this->user) {
             Auth::logout();

@@ -5,6 +5,10 @@ namespace Source\Controllers\Dashboard;
 use Fluxor\Response;
 use App\Core\ORMHelper;
 use Source\Models\User;
+use Source\Models\File;
+use Source\Models\ApiToken;
+use Source\Models\Credit;
+use Source\Models\UserRole;
 
 class SettingsController extends DashboardController
 {
@@ -25,25 +29,20 @@ class SettingsController extends DashboardController
         $username = $this->request->input('username');
         $email = $this->request->input('email');
 
-        // Validate
         if (empty($name) || empty($username) || empty($email)) {
             return Response::error('All fields are required', 400);
         }
 
-        // Check username uniqueness
-        $userRepo = ORMHelper::getRepository(User::class);
-        $existingUser = $userRepo->findOne(['username' => $username]);
-        if ($existingUser && $existingUser->getId() !== $this->user->getId()) {
-            return Response::error('Username already taken', 400);
+        $allUsers = ORMHelper::findAll(User::class);
+        foreach ($allUsers as $user) {
+            if ($user->getUsername() === $username && $user->getId() !== $this->user->getId()) {
+                return Response::error('Username already taken', 400);
+            }
+            if ($user->getEmail() === $email && $user->getId() !== $this->user->getId()) {
+                return Response::error('Email already registered', 400);
+            }
         }
 
-        // Check email uniqueness
-        $existingUser = $userRepo->findOne(['email' => $email]);
-        if ($existingUser && $existingUser->getId() !== $this->user->getId()) {
-            return Response::error('Email already registered', 400);
-        }
-
-        // Update user
         $this->user->setName($name)
             ->setUsername($username)
             ->setEmail($email);
@@ -52,7 +51,6 @@ class SettingsController extends DashboardController
         $entityManager->persist($this->user);
         $entityManager->run();
 
-        // Update session
         $_SESSION['auth_credentials']['name'] = $name;
         $_SESSION['auth_credentials']['username'] = $username;
         $_SESSION['auth_credentials']['email'] = $email;
@@ -84,55 +82,48 @@ class SettingsController extends DashboardController
 
     public function deleteAccount()
     {
-        // Delete all files
-        $fileRepo = ORMHelper::getRepository(\Source\Models\File::class);
-        $files = $fileRepo->findAll(['userId' => $this->user->getId()]);
-
-        foreach ($files as $file) {
-            $absolutePath = base_path('storage/' . $file->getStoragePath());
-            if (file_exists($absolutePath)) {
-                unlink($absolutePath);
-            }
-            $entityManager = ORMHelper::getManager();
-            $entityManager->delete($file);
-        }
-
-        // Delete tokens
-        $tokenRepo = ORMHelper::getRepository(\Source\Models\ApiToken::class);
-        $tokens = $tokenRepo->findAll(['userId' => $this->user->getId()]);
-        foreach ($tokens as $token) {
-            $entityManager = ORMHelper::getManager();
-            $entityManager->delete($token);
-        }
-
-        // Delete credits
-        $creditRepo = ORMHelper::getRepository(\Source\Models\Credit::class);
-        $credits = $creditRepo->findOne(['userId' => $this->user->getId()]);
-        if ($credits) {
-            $entityManager = ORMHelper::getManager();
-            $entityManager->delete($credits);
-        }
-
-        // Delete roles
-        $roleRepo = ORMHelper::getRepository(\Source\Models\UserRole::class);
-        $roles = $roleRepo->findAll(['userId' => $this->user->getId()]);
-        foreach ($roles as $role) {
-            $entityManager = ORMHelper::getManager();
-            $entityManager->delete($role);
-        }
-
-        // Delete user
         $entityManager = ORMHelper::getManager();
+
+        $allFiles = ORMHelper::findAll(File::class);
+        foreach ($allFiles as $file) {
+            if ($file->getUserId() === $this->user->getId()) {
+                $absolutePath = base_path('storage/' . $file->getStoragePath());
+                if (file_exists($absolutePath)) {
+                    unlink($absolutePath);
+                }
+                $entityManager->delete($file);
+            }
+        }
+
+        $allTokens = ORMHelper::findAll(ApiToken::class);
+        foreach ($allTokens as $token) {
+            if ($token->getUserId() === $this->user->getId()) {
+                $entityManager->delete($token);
+            }
+        }
+
+        $allCredits = ORMHelper::findAll(Credit::class);
+        foreach ($allCredits as $credit) {
+            if ($credit->getUserId() === $this->user->getId()) {
+                $entityManager->delete($credit);
+            }
+        }
+
+        $allRoles = ORMHelper::findAll(UserRole::class);
+        foreach ($allRoles as $role) {
+            if ($role->getUserId() === $this->user->getId()) {
+                $entityManager->delete($role);
+            }
+        }
+
         $entityManager->delete($this->user);
         $entityManager->run();
 
-        // Delete storage directory
         $storagePath = base_path('storage/' . $this->user->getStoragePath());
         if (is_dir($storagePath)) {
             $this->removeDirectory($storagePath);
         }
 
-        // Logout and redirect
         \App\Core\Auth::logout();
 
         return Response::success([

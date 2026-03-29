@@ -11,17 +11,31 @@ class HomeController extends DashboardController
 {
     public function index()
     {
-        // Get user stats
-        $fileRepo = ORMHelper::getRepository(File::class);
-        $files = $fileRepo->findAll(['userId' => $this->user->getId(), 'deletedAt' => null]);
+        $allFiles = ORMHelper::findAll(File::class);
+        $files = [];
+        $totalSize = 0;
+        
+        foreach ($allFiles as $file) {
+            if ($file->getUserId() === $this->user->getId() && !$file->isDeleted()) {
+                $files[] = $file;
+                $totalSize += $file->getSizeBytes();
+            }
+        }
+        
         $totalFilesCount = count($files);
-        $totalSize = array_sum(array_map(fn($f) => $f->getSizeBytes(), $files));
-
-        // Get credits
-        $creditRepo = ORMHelper::getRepository(Credit::class);
-        $credits = $creditRepo->findOne(['userId' => $this->user->getId()]);
-
-        // Get recent files (limit 5)
+        
+        $allCredits = ORMHelper::findAll(Credit::class);
+        $credits = null;
+        foreach ($allCredits as $c) {
+            if ($c->getUserId() === $this->user->getId()) {
+                $credits = $c;
+                break;
+            }
+        }
+        
+        usort($files, function ($a, $b) {
+            return $b->getCreatedAt() <=> $a->getCreatedAt();
+        });
         $recentFiles = array_slice($files, 0, 5);
 
         return Response::view('dashboard/index', [

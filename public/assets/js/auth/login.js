@@ -1,9 +1,9 @@
 /**
- * Login Page Script (jQuery)
+ * Login Page Script
  */
 
-$(document).ready(function () {
-    $('#loginForm').on('submit', function (e) {
+$(document).ready(function() {
+    $('#loginForm').on('submit', function(e) {
         e.preventDefault();
 
         var $form = $(this);
@@ -14,25 +14,29 @@ $(document).ready(function () {
             method: 'POST',
             data: formData,
             dataType: 'json',
-            success: function (response) {
+            success: function(response) {
                 if (response.success) {
-                    if (response.data && response.data.redirect) {
-                        window.location.href = response.data.redirect;
-                    } else {
-                        window.location.href = '/dashboard';
-                    }
+                    window.Toast.show('Logged in successfully!', 'success');
+                    setTimeout(function() {
+                        if (response.data && response.data.redirect) {
+                            window.location.href = response.data.redirect;
+                        } else {
+                            window.location.href = '/dashboard';
+                        }
+                    }, 500);
                 } else {
-                    alert(response.message);
+                    window.Toast.show(response.message, 'error');
                 }
             },
-            error: function (xhr) {
+            error: function(xhr) {
                 var response = xhr.responseJSON;
                 if (response && response.details) {
-                    alert(response.message + '\n' + Object.values(response.details).join('\n'));
+                    var errorMsg = response.message + '\n' + Object.values(response.details).join('\n');
+                    window.Toast.show(errorMsg, 'error');
                 } else if (response) {
-                    alert(response.message);
+                    window.Toast.show(response.message, 'error');
                 } else {
-                    alert('An error occurred. Please try again.');
+                    window.Toast.show('An error occurred. Please try again.', 'error');
                 }
             }
         });

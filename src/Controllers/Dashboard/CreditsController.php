@@ -12,24 +12,37 @@ class CreditsController extends DashboardController
 {
     public function index()
     {
-        $creditRepo = ORMHelper::getRepository(Credit::class);
-        $credits = $creditRepo->findOne(['userId' => $this->user->getId()]);
+        $allCredits = ORMHelper::findAll(Credit::class);
+        $credits = null;
+        foreach ($allCredits as $c) {
+            if ($c->getUserId() === $this->user->getId()) {
+                $credits = $c;
+                break;
+            }
+        }
 
-        $transactionRepo = ORMHelper::getRepository(CreditTransaction::class);
-        $transactions = $transactionRepo->findAll(['userId' => $this->user->getId()]);
+        $allTransactions = ORMHelper::findAll(CreditTransaction::class);
+        $transactions = [];
+        foreach ($allTransactions as $t) {
+            if ($t->getUserId() === $this->user->getId()) {
+                $transactions[] = $t;
+            }
+        }
 
-        // Sort by created_at DESC manually
         usort($transactions, function ($a, $b) {
             return $b->getCreatedAt() <=> $a->getCreatedAt();
         });
 
-        // Limit to 20
         $transactions = array_slice($transactions, 0, 20);
 
-        $planRepo = ORMHelper::getRepository(Plan::class);
-        $plans = $planRepo->findAll(['isActive' => true]);
+        $allPlans = ORMHelper::findAll(Plan::class);
+        $plans = [];
+        foreach ($allPlans as $p) {
+            if ($p->isActive()) {
+                $plans[] = $p;
+            }
+        }
 
-        // Sort by sort_order
         usort($plans, function ($a, $b) {
             return $a->getSortOrder() <=> $b->getSortOrder();
         });
@@ -47,25 +60,34 @@ class CreditsController extends DashboardController
 
     public function upgrade($planSlug)
     {
-        $planRepo = ORMHelper::getRepository(Plan::class);
-        $plan = $planRepo->findOne(['slug' => $planSlug, 'isActive' => true]);
+        $allPlans = ORMHelper::findAll(Plan::class);
+        $plan = null;
+        foreach ($allPlans as $p) {
+            if ($p->getSlug() === $planSlug && $p->isActive()) {
+                $plan = $p;
+                break;
+            }
+        }
 
         if (!$plan) {
             return Response::error('Plan not found', 404);
         }
 
-        $creditRepo = ORMHelper::getRepository(Credit::class);
-        $credits = $creditRepo->findOne(['userId' => $this->user->getId()]);
+        $allCredits = ORMHelper::findAll(Credit::class);
+        $credits = null;
+        foreach ($allCredits as $c) {
+            if ($c->getUserId() === $this->user->getId()) {
+                $credits = $c;
+                break;
+            }
+        }
 
         if (!$credits || $credits->getAmount() < $plan->getPrice()) {
             return Response::error('Insufficient credits', 402);
         }
 
-        // Deduct credits
-        $oldAmount = $credits->getAmount();
         $credits->subtract($plan->getPrice());
 
-        // Create transaction
         $transaction = new CreditTransaction(
             $this->user->getId(),
             'upgrade_plan',
@@ -81,7 +103,6 @@ class CreditsController extends DashboardController
             'new_plan_name' => $plan->getName()
         ]);
 
-        // Update user plan
         $this->user->setPlanId($plan->getId())
             ->setStorageLimitBytes($plan->getStorageLimitBytes())
             ->setBandwidthLimitBytes($plan->getBandwidthLimitBytes());
@@ -100,8 +121,12 @@ class CreditsController extends DashboardController
 
     private function getPlanName($planId)
     {
-        $planRepo = ORMHelper::getRepository(Plan::class);
-        $plan = $planRepo->findByPK($planId);
-        return $plan ? $plan->getName() : 'Unknown';
+        $allPlans = ORMHelper::findAll(Plan::class);
+        foreach ($allPlans as $plan) {
+            if ($plan->getId() === $planId) {
+                return $plan->getName();
+            }
+        }
+        return 'Unknown';
     }
 }

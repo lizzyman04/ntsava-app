@@ -10,8 +10,14 @@ class TokensController extends DashboardController
 {
     public function index()
     {
-        $tokenRepo = ORMHelper::getRepository(ApiToken::class);
-        $tokens = $tokenRepo->findAll(['userId' => $this->user->getId()]);
+        $allTokens = ORMHelper::findAll(ApiToken::class);
+        $tokens = [];
+
+        foreach ($allTokens as $token) {
+            if ($token->getUserId() === $this->user->getId()) {
+                $tokens[] = $token;
+            }
+        }
 
         return Response::view('dashboard/tokens', [
             'title' => 'API Tokens',
@@ -66,8 +72,15 @@ class TokensController extends DashboardController
 
     public function revoke($id)
     {
-        $tokenRepo = ORMHelper::getRepository(ApiToken::class);
-        $token = $tokenRepo->findOne(['id' => (int) $id, 'userId' => $this->user->getId()]);
+        $allTokens = ORMHelper::findAll(ApiToken::class);
+        $token = null;
+
+        foreach ($allTokens as $t) {
+            if ($t->getId() === (int) $id && $t->getUserId() === $this->user->getId()) {
+                $token = $t;
+                break;
+            }
+        }
 
         if (!$token) {
             return Response::error('Token not found', 404);

@@ -3,4 +3,4 @@
 use Fluxor\Flow;
 use Source\Controllers\PageController;
 
-Flow::GET()->to(PageController::class, 'home');
+Flow::GET()->to(PageController::class, 'about');

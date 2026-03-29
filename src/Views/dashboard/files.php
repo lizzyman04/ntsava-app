@@ -74,7 +74,7 @@ files
                             <td class="text-gray-600 dark:text-gray-400"><?= $file->getCreatedAt()->format('d/m/Y H:i') ?></td>
                             <td class="py-3">
                                 <div class="flex items-center gap-2">
-                                    <a href="<?= $user->getPublicUrl($file->getStoragePath()) ?>" target="_blank"
+                                    <a href="<?= $file->getPublicUrl() ?>" target="_blank"
                                         class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition" title="View">
                                         <i class="fas fa-eye text-gray-500 hover:text-primary-500"></i>
                                     </a>

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * CDN App - View Helpers
+ * Ntsava App - View Helpers
  * Collection of helper functions for views and components
  */
 

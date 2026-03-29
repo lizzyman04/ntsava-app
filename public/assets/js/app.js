@@ -1,112 +1,65 @@
 /**
- * CDN App - Main JavaScript (jQuery)
- * Handles theme toggle, mobile menu, dropdowns, and common utilities
+ * Ntsava App - Main JavaScript (jQuery)
+ * Handles mobile menu, dropdowns, and common utilities
  */
 
 $(document).ready(function () {
-    // ============================================
-    // Theme Toggle
-    // ============================================
-    function initTheme() {
-        var savedTheme = localStorage.getItem('theme');
-
-        // Apply theme based on saved preference or system preference
-        if (savedTheme === 'dark') {
-            $('html').addClass('dark');
-        } else if (savedTheme === 'light') {
-            $('html').removeClass('dark');
-        } else {
-            // Check system preference
-            if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                $('html').addClass('dark');
-            } else {
-                $('html').removeClass('dark');
-            }
-        }
-
-        // Update button icons based on current theme
-        updateThemeIcons();
-    }
-
-    function updateThemeIcons() {
-        var isDark = $('html').hasClass('dark');
-        var $moonIcon = $('#theme-toggle .fa-moon');
-        var $sunIcon = $('#theme-toggle .fa-sun');
-
-        if (isDark) {
-            $moonIcon.addClass('hidden');
-            $sunIcon.removeClass('hidden');
-        } else {
-            $moonIcon.removeClass('hidden');
-            $sunIcon.addClass('hidden');
-        }
-    }
-
-    $('#theme-toggle').on('click', function () {
-        var isDark = $('html').hasClass('dark');
-
-        if (isDark) {
-            $('html').removeClass('dark');
-            localStorage.setItem('theme', 'light');
-        } else {
-            $('html').addClass('dark');
-            localStorage.setItem('theme', 'dark');
-        }
-
-        updateThemeIcons();
-
-        // Dispatch event for other components
-        $(window).trigger('themeChanged', { dark: !isDark });
-    });
-
-    // Listen for system theme changes
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function (e) {
-        if (!localStorage.getItem('theme')) {
-            if (e.matches) {
-                $('html').addClass('dark');
-            } else {
-                $('html').removeClass('dark');
-            }
-            updateThemeIcons();
-        }
-    });
-
     // ============================================
     // Mobile Menu
     // ============================================
     function initMobileMenu() {
         var $mobileMenuBtn = $('#mobile-menu-btn');
         var $sidebar = $('.sidebar');
+        var $overlay = $('.sidebar-overlay');
+        var $closeSidebar = $('#close-sidebar');
+
+        if ($mobileMenuBtn.length === 0) return;
+
+        function openMenu() {
+            $sidebar.addClass('open');
+            if ($overlay.length) {
+                $overlay.addClass('show');
+            }
+            $mobileMenuBtn.find('i').removeClass('fa-bars').addClass('fa-times');
+            $('body').css('overflow', 'hidden');
+        }
+
+        function closeMenu() {
+            $sidebar.removeClass('open');
+            if ($overlay.length) {
+                $overlay.removeClass('show');
+            }
+            $mobileMenuBtn.find('i').removeClass('fa-times').addClass('fa-bars');
+            $('body').css('overflow', '');
+        }
 
         $mobileMenuBtn.on('click', function (e) {
             e.preventDefault();
-            $sidebar.toggleClass('open');
-            $(this).find('i').toggleClass('fa-bars fa-times');
-        });
-
-        // Close when clicking outside
-        $(document).on('click', function (e) {
-            if ($sidebar.hasClass('open') &&
-                !$sidebar.is(e.target) &&
-                $sidebar.has(e.target).length === 0 &&
-                !$mobileMenuBtn.is(e.target) &&
-                $mobileMenuBtn.has(e.target).length === 0) {
-                $sidebar.removeClass('open');
-                $mobileMenuBtn.find('i').removeClass('fa-times').addClass('fa-bars');
+            e.stopPropagation();
+            if ($sidebar.hasClass('open')) {
+                closeMenu();
+            } else {
+                openMenu();
             }
         });
 
-        // Close on escape key
+        if ($closeSidebar.length) {
+            $closeSidebar.on('click', closeMenu);
+        }
+
+        if ($overlay.length) {
+            $overlay.on('click', closeMenu);
+        }
+
         $(document).on('keydown', function (e) {
             if (e.key === 'Escape' && $sidebar.hasClass('open')) {
-                $sidebar.removeClass('open');
-                $mobileMenuBtn.find('i').removeClass('fa-times').addClass('fa-bars');
+                closeMenu();
             }
         });
     }
 
     // ============================================
-    // User Dropdown (fallback in case header.js doesn't load)
+    // User Dropdown
     // ============================================
     function initUserDropdown() {
         var $userMenuBtn = $('#user-menu-btn');
@@ -116,39 +69,50 @@ $(document).ready(function () {
 
         var $chevron = $userMenuBtn.find('.fa-chevron-down');
 
-        function toggleDropdown(show) {
-            if (show) {
-                $userDropdown.addClass('show');
-                $userMenuBtn.attr('aria-expanded', 'true');
+        function openDropdown() {
+            $userDropdown.removeClass('invisible opacity-0');
+            $userDropdown.addClass('visible opacity-100');
+            $userMenuBtn.attr('aria-expanded', 'true');
+            if ($chevron.length) {
                 $chevron.css('transform', 'rotate(180deg)');
-            } else {
-                $userDropdown.removeClass('show');
-                $userMenuBtn.attr('aria-expanded', 'false');
+            }
+        }
+
+        function closeDropdown() {
+            $userDropdown.removeClass('visible opacity-100');
+            $userDropdown.addClass('invisible opacity-0');
+            $userMenuBtn.attr('aria-expanded', 'false');
+            if ($chevron.length) {
                 $chevron.css('transform', 'rotate(0deg)');
+            }
+        }
+
+        function toggleDropdown() {
+            if ($userDropdown.hasClass('opacity-100')) {
+                closeDropdown();
+            } else {
+                openDropdown();
             }
         }
 
         $userMenuBtn.on('click', function (e) {
             e.preventDefault();
             e.stopPropagation();
-            var isOpen = $userDropdown.hasClass('show');
-            toggleDropdown(!isOpen);
+            toggleDropdown();
         });
 
-        // Close dropdown when clicking outside
         $(document).on('click', function (e) {
             if (!$userMenuBtn.is(e.target) &&
                 $userMenuBtn.has(e.target).length === 0 &&
                 !$userDropdown.is(e.target) &&
                 $userDropdown.has(e.target).length === 0) {
-                toggleDropdown(false);
+                closeDropdown();
             }
         });
 
-        // Close on escape key
         $(document).on('keydown', function (e) {
-            if (e.key === 'Escape' && $userDropdown.hasClass('show')) {
-                toggleDropdown(false);
+            if (e.key === 'Escape' && $userDropdown.hasClass('opacity-100')) {
+                closeDropdown();
             }
         });
     }
@@ -160,16 +124,24 @@ $(document).ready(function () {
         show: function (message, type) {
             type = type || 'success';
             var $toast = $('#toast');
-            var colors = {
-                success: 'bg-green-500',
-                error: 'bg-red-500',
-                warning: 'bg-yellow-500',
-                info: 'bg-blue-500'
+
+            if ($toast.length === 0) {
+                $toast = $('<div>')
+                    .attr('id', 'toast')
+                    .addClass('toast')
+                    .appendTo('body');
+            }
+
+            var icons = {
+                success: 'fa-check-circle',
+                error: 'fa-exclamation-circle',
+                warning: 'fa-exclamation-triangle',
+                info: 'fa-info-circle'
             };
 
-            $toast.removeClass('bg-green-500 bg-red-500 bg-yellow-500 bg-blue-500')
-                .addClass(colors[type] || colors.success)
-                .html('<i class="fas ' + getIconForType(type) + ' mr-2"></i>' + message)
+            $toast.removeClass('success error warning info')
+                .addClass(type)
+                .html('<i class="fas ' + (icons[type] || icons.info) + ' mr-2"></i>' + message)
                 .fadeIn(300);
 
             setTimeout(function () {
@@ -177,16 +149,6 @@ $(document).ready(function () {
             }, 3000);
         }
     };
-
-    function getIconForType(type) {
-        switch (type) {
-            case 'success': return 'fa-check-circle';
-            case 'error': return 'fa-exclamation-circle';
-            case 'warning': return 'fa-exclamation-triangle';
-            case 'info': return 'fa-info-circle';
-            default: return 'fa-info-circle';
-        }
-    }
 
     // ============================================
     // AJAX Helper
@@ -278,8 +240,6 @@ $(document).ready(function () {
         }
     };
 
-    // Initialize all components
-    initTheme();
     initMobileMenu();
     initUserDropdown();
 });

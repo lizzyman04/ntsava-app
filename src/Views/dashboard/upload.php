@@ -1,15 +1,6 @@
 <?php
-// Load helpers
 require_once __DIR__ . '/../components/helpers.php';
 
-/**
- * @var \Source\Models\User $user
- * @var int $max_size
- * @var string $allowed_types
- * @var string $title
- * @var string $page_title
- * @var string $active_menu
- */
 use Fluxor\View;
 ?>
 <?php View::extend('layouts/dashboard'); ?>
@@ -47,27 +38,27 @@ upload
 <?php View::section('content'); ?>
 <div class="glass-card p-6">
     <div class="text-center mb-8">
-        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Upload Files</h1>
-        <p class="text-gray-500 dark:text-gray-400 mt-1">Drag and drop files or click to select</p>
+        <h1 class="text-2xl font-bold text-gray-900">Upload Files</h1>
+        <p class="text-gray-500 mt-1">Drag and drop files or click to select</p>
     </div>
 
     <div class="drop-zone" id="dropZone">
         <i class="fas fa-cloud-upload-alt text-5xl text-gray-400 mb-4"></i>
-        <p class="text-gray-600 dark:text-gray-400">Drag & drop files here or click to select</p>
-        <p class="text-sm text-gray-500 dark:text-gray-500 mt-2">Max size: <?= round($max_size / 1048576, 2) ?> MB</p>
-        <p class="text-sm text-gray-500 dark:text-gray-500">Allowed: <?= $allowed_types ?></p>
+        <p class="text-gray-600">Drag & drop files here or click to select</p>
+        <p class="text-sm text-gray-500 mt-2">Max size: <?= round($max_size / 1048576, 2) ?> MB</p>
+        <p class="text-sm text-gray-500">Allowed: <?= $allowed_types ?></p>
         <input type="file" id="fileInput" style="display: none;" multiple>
     </div>
 
     <div class="mt-6">
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Path (optional)</label>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Path (optional)</label>
         <input type="text" id="path" class="input-field" placeholder="e.g., photos/2026/">
-        <p class="text-xs text-gray-500 dark:text-gray-500 mt-1">Files will be stored at:
+        <p class="text-xs text-gray-500 mt-1">Files will be stored at:
             /u/<?= $user->getUsername() ?>/[path]/filename</p>
     </div>
 
     <div id="uploadQueue" class="mt-6" style="display: none;">
-        <h3 class="font-semibold text-gray-900 dark:text-white mb-3">Upload Queue</h3>
+        <h3 class="font-semibold text-gray-900 mb-3">Upload Queue</h3>
         <div id="queueList" class="space-y-2"></div>
     </div>
 </div>
