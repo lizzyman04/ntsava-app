@@ -116,7 +116,7 @@ use Fluxor\View;
 
             <div>
                 <h2 class="text-2xl font-semibold text-gray-900 mb-3">11. Contact Us</h2>
-                <p class="text-gray-600 leading-relaxed">Questions about privacy? Contact us at <a href="mailto:privacy@ntsava.space" class="text-primary-600 hover:underline">privacy@ntsava.space</a></p>
+                <p class="text-gray-600 leading-relaxed">Questions about privacy? Contact us at <a href="mailto:cdn+privacy@tudocomlizzyman.com" class="text-primary-600 hover:underline">cdn+privacy@tudocomlizzyman.com</a></p>
             </div>
         </div>
     </div>

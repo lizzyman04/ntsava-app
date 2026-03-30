@@ -57,7 +57,7 @@ credits
                                 <?= $credits >= $plan->getPrice() ? 'Upgrade' : 'Insufficient Credits' ?>
                             </button>
                         <?php else: ?>
-                            <a href="mailto:cdn@tudocomlizzyman.com"
+                            <a href="mailto:cdn+sales@tudocomlizzyman.com"
                                 class="mt-4 btn-secondary w-full inline-block text-center">
                                 Contact Sales
                             </a>

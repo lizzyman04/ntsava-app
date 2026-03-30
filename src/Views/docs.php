@@ -231,7 +231,7 @@ use Fluxor\View;
                     {<br>
                     &nbsp;&nbsp;"success": true,<br>
                     &nbsp;&nbsp;"data": {<br>
-                    &nbsp;&nbsp;&nbsp;&nbsp;"url": "https://cdn.ntsava.space/u/username/photos/2026/image.jpg",<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;"url": "https://cdn.omeu.space/u/username/photos/2026/image.jpg",<br>
                     &nbsp;&nbsp;&nbsp;&nbsp;"uuid": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",<br>
                     &nbsp;&nbsp;&nbsp;&nbsp;"size": 245760,<br>
                     &nbsp;&nbsp;&nbsp;&nbsp;"mime": "image/jpeg"<br>

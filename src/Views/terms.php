@@ -72,7 +72,7 @@ use Fluxor\View;
 
             <div>
                 <h2 class="text-2xl font-semibold text-gray-900 mb-3">11. Contact</h2>
-                <p class="text-gray-600 leading-relaxed">Questions about these Terms? Contact us at <a href="mailto:legal@ntsava.space" class="text-primary-600 hover:underline">legal@ntsava.space</a></p>
+                <p class="text-gray-600 leading-relaxed">Questions about these Terms? Contact us at <a href="mailto:cdn+legal@tudocomlizzyman.com" class="text-primary-600 hover:underline">cdn+legal@tudocomlizzyman.com</a></p>
             </div>
         </div>
     </div>

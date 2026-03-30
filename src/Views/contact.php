@@ -36,16 +36,16 @@ use Fluxor\View;
                         <i class="fas fa-envelope text-primary-600 text-xl"></i>
                     </div>
                     <h3 class="font-semibold mb-1">Email</h3>
-                    <p class="text-sm text-gray-500">cdn@tudocomlizzyman.com</p>
-                    <p class="text-sm text-gray-500">sales@tudocomlizzyman</p>
+                    <p class="text-sm text-gray-500">cdn+support@tudocomlizzyman.com</p>
+                    <p class="text-sm text-gray-500">cdn+sales@tudocomlizzyman.com</p>
                 </div>
                 <div class="glass-card p-6 text-center">
                     <div class="w-12 h-12 rounded-full bg-primary-100 flex items-center justify-center mx-auto mb-3">
                         <i class="fas fa-clock text-primary-600 text-xl"></i>
                     </div>
                     <h3 class="font-semibold mb-1">Support Hours</h3>
-                    <p class="text-sm text-gray-500">24/7 Email Support</p>
-                    <p class="text-sm text-gray-500">Live Chat: Mon-Fri, 9am-6pm</p>
+                    <p class="text-sm text-gray-500">All inquiries handled via email</p>
+                    <p class="text-sm text-gray-500">Average response time: 2 hours</p>
                 </div>
             </div>
 

@@ -135,7 +135,7 @@ use Fluxor\View;
 <!-- CTA -->
 <section class="py-20 bg-primary-600">
     <div class="container mx-auto px-4 text-center">
-        <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Ready to get started?</h2>
+        <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">Ready to get started?</h2>
         <p class="text-primary-100 mb-8 max-w-2xl mx-auto"> Join to other developers using Ntsava for their file storage
             and delivery</p>
         <a href="/auth/signup"
