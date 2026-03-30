@@ -20,7 +20,8 @@ use Fluxor\View;
 <section class="relative overflow-hidden py-4 bg-gradient-to-br from-primary-50 to-white">
     <div class="container mx-auto px-4 relative z-10">
         <div class="text-center max-w-4xl mx-auto">
-            <div class="inline-flex items-center gap-2 bg-primary-100 text-primary-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
+            <div
+                class="inline-flex items-center gap-2 bg-primary-100 text-primary-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
                 <i class="fas fa-basket-shopping"></i>
                 <span>Your digital basket</span>
             </div>
@@ -127,54 +128,7 @@ use Fluxor\View;
             <p class="text-gray-600 max-w-2xl mx-auto">Choose the perfect plan for your needs</p>
         </div>
 
-        <div class="grid md:grid-cols-4 gap-6 max-w-6xl mx-auto">
-            <?php foreach ($plans as $plan): ?>
-                <div class="glass-card p-6 text-center <?= $plan['is_popular'] ? 'border-2 border-primary-500 relative' : '' ?>">
-                    <?php if ($plan['is_popular']): ?>
-                        <span class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-primary-600 text-white text-xs px-3 py-1 rounded-full">Popular</span>
-                    <?php endif; ?>
-                    <h3 class="text-xl font-bold mb-2"><?= htmlspecialchars($plan['name']) ?></h3>
-                    <div class="mb-2">
-                        <span class="text-3xl font-bold text-primary-600"><?= $plan['price_mzn'] > 0 ? number_format($plan['price_mzn'], 0) : '0' ?> MZN</span>
-                        <span class="text-sm text-gray-500">/month</span>
-                    </div>
-                    <?php if ($plan['price_usd'] > 0): ?>
-                        <div class="text-sm text-gray-500 mb-4">
-                            ≈ <?= number_format($plan['price_usd'], 2) ?> USD
-                        </div>
-                    <?php else: ?>
-                        <div class="text-sm text-gray-500 mb-4">&nbsp;</div>
-                    <?php endif; ?>
-                    <ul class="space-y-2 mb-6 text-left">
-                        <li class="flex items-center gap-2">
-                            <i class="fas fa-check-circle text-green-500"></i>
-                            <span><?= $plan['storage_gb'] === 'Unlimited' ? 'Unlimited Storage' : $plan['storage_gb'] . ' GB Storage' ?></span>
-                        </li>
-                        <li class="flex items-center gap-2">
-                            <i class="fas fa-check-circle text-green-500"></i>
-                            <span><?= $plan['bandwidth_gb'] === 'Unlimited' ? 'Unlimited Bandwidth' : $plan['bandwidth_gb'] . ' GB Bandwidth' ?></span>
-                        </li>
-                        <li class="flex items-center gap-2">
-                            <i class="fas fa-check-circle text-green-500"></i>
-                            <span>API Access</span>
-                        </li>
-                        <?php if ($plan['slug'] !== 'free'): ?>
-                            <li class="flex items-center gap-2">
-                                <i class="fas fa-check-circle text-green-500"></i>
-                                <span>Priority Support</span>
-                            </li>
-                        <?php endif; ?>
-                    </ul>
-                    <?php if ($plan['slug'] === 'free'): ?>
-                        <a href="/auth/signup" class="btn-outline w-full block">Get Started</a>
-                    <?php elseif ($plan['slug'] === 'business'): ?>
-                        <a href="/contact?plan=business" class="btn-outline w-full block">Contact Sales</a>
-                    <?php else: ?>
-                        <a href="/contact?plan=<?= $plan['slug'] ?>" class="btn-primary w-full block">Upgrade Now</a>
-                    <?php endif; ?>
-                </div>
-            <?php endforeach; ?>
-        </div>
+        <?php component('plans-grid', ['plans' => $plans]); ?>
     </div>
 </section>
 
@@ -182,8 +136,10 @@ use Fluxor\View;
 <section class="py-20 bg-primary-600">
     <div class="container mx-auto px-4 text-center">
         <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Ready to get started?</h2>
-        <p class="text-primary-100 mb-8 max-w-2xl mx-auto"> Join to other developers using Ntsava for their file storage and delivery</p>
-        <a href="/auth/signup" class="bg-white text-primary-600 hover:bg-gray-100 px-8 py-3 rounded-lg font-semibold transition-colors inline-flex items-center gap-2">
+        <p class="text-primary-100 mb-8 max-w-2xl mx-auto"> Join to other developers using Ntsava for their file storage
+            and delivery</p>
+        <a href="/auth/signup"
+            class="bg-white text-primary-600 hover:bg-gray-100 px-8 py-3 rounded-lg font-semibold transition-colors inline-flex items-center gap-2">
             <i class="fas fa-rocket"></i> Create Free Account
         </a>
     </div>

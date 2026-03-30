@@ -11,6 +11,7 @@
             </p>
             <div class="flex items-center gap-6">
                 <a href="/about" class="text-sm text-gray-500 hover:text-primary-600 transition">About</a>
+                <a href="/docs" class="text-sm text-gray-500 hover:text-primary-600 transition">Docs</a>
                 <a href="/privacy" class="text-sm text-gray-500 hover:text-primary-600 transition">Privacy</a>
                 <a href="/terms" class="text-sm text-gray-500 hover:text-primary-600 transition">Terms</a>
             </div>

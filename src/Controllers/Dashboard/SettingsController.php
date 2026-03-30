@@ -87,9 +87,12 @@ class SettingsController extends DashboardController
         $allFiles = ORMHelper::findAll(File::class);
         foreach ($allFiles as $file) {
             if ($file->getUserId() === $this->user->getId()) {
-                $absolutePath = base_path('storage/' . $file->getStoragePath());
-                if (file_exists($absolutePath)) {
-                    unlink($absolutePath);
+                $storagePath = $file->getStoragePath();
+                if ($storagePath) {
+                    $absolutePath = base_path('storage/' . $storagePath);
+                    if (file_exists($absolutePath) && is_file($absolutePath)) {
+                        unlink($absolutePath);
+                    }
                 }
                 $entityManager->delete($file);
             }
@@ -147,7 +150,9 @@ class SettingsController extends DashboardController
             if (is_dir($path)) {
                 $this->removeDirectory($path);
             } else {
-                unlink($path);
+                if (is_file($path)) {
+                    unlink($path);
+                }
             }
         }
 

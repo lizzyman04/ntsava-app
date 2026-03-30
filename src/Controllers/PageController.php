@@ -16,7 +16,7 @@ class PageController extends Controller
     {
         $totalUsers = count(ORMHelper::getRepository(User::class)->findAll());
         $allFiles = ORMHelper::getRepository(File::class)->findAll();
-        
+
         $totalFiles = 0;
         foreach ($allFiles as $file) {
             if (!$file->isDeleted()) {
@@ -26,18 +26,18 @@ class PageController extends Controller
 
         $planRepo = ORMHelper::getRepository(Plan::class);
         $plans = $planRepo->findAll(['isActive' => true]);
-        
-        usort($plans, function($a, $b) {
+
+        usort($plans, function ($a, $b) {
             return $a->getSortOrder() <=> $b->getSortOrder();
         });
 
         $formattedPlans = [];
         $exchangeRate = 65;
-        
+
         foreach ($plans as $plan) {
             $priceMZN = $plan->getPrice();
             $priceUSD = $priceMZN > 0 ? round($priceMZN / $exchangeRate, 2) : 0;
-            
+
             $formattedPlans[] = [
                 'name' => $plan->getName(),
                 'slug' => $plan->getSlug(),
@@ -68,7 +68,7 @@ class PageController extends Controller
     {
         $totalUsers = count(ORMHelper::getRepository(User::class)->findAll());
         $allFiles = ORMHelper::getRepository(File::class)->findAll();
-        
+
         $totalFiles = 0;
         $totalStorage = 0;
 
@@ -98,10 +98,36 @@ class PageController extends Controller
         $plan = $this->request->input('plan');
         $success = $this->request->input('success') === '1';
 
+        $planRepo = ORMHelper::getRepository(Plan::class);
+        $plans = $planRepo->findAll(['isActive' => true]);
+
+        usort($plans, function ($a, $b) {
+            return $a->getSortOrder() <=> $b->getSortOrder();
+        });
+
+        $formattedPlans = [];
+        $exchangeRate = 65;
+
+        foreach ($plans as $p) {
+            $priceMZN = $p->getPrice();
+            $priceUSD = $priceMZN > 0 ? round($priceMZN / $exchangeRate, 2) : 0;
+
+            $formattedPlans[] = [
+                'name' => $p->getName(),
+                'slug' => $p->getSlug(),
+                'price_mzn' => $priceMZN,
+                'price_usd' => $priceUSD,
+                'is_popular' => $p->getSlug() === 'plus',
+                'storage_gb' => $p->getStorageLimitBytes() > 0 ? round($p->getStorageLimitBytes() / 1073741824, 2) : 'Unlimited',
+                'bandwidth_gb' => $p->getBandwidthLimitBytes() > 0 ? round($p->getBandwidthLimitBytes() / 1073741824, 2) : 'Unlimited',
+            ];
+        }
+
         return Response::view('contact', [
             'title' => 'Contact Ntsava',
             'plan' => $plan,
-            'success' => $success
+            'success' => $success,
+            'plans' => $formattedPlans
         ]);
     }
 
@@ -122,7 +148,7 @@ class PageController extends Controller
         }
 
         $mailer = new Mailer();
-        
+
         $emailBody = "
             <h2>New Contact Form Submission - Ntsava App</h2>
             <p><strong>Name:</strong> " . htmlspecialchars($name) . "</p>
@@ -143,12 +169,19 @@ class PageController extends Controller
             <hr>
             <p><strong>Ntsava App</strong><br>Everything you need, in one basket.</p>
         ";
-        
+
         $mailer->send($email, 'Thank you for contacting Ntsava', $confirmationBody);
 
         return Response::success([
             'redirect' => '/contact?success=1'
         ], 'Message sent successfully');
+    }
+
+    public function docs()
+    {
+        return Response::view('docs', [
+            'title' => 'API Documentation'
+        ]);
     }
 
     public function terms()
@@ -170,17 +203,17 @@ class PageController extends Controller
         if ($number < 100) {
             return '~ 100';
         }
-        
+
         if ($number < 1000) {
             $rounded = ceil($number / 100) * 100;
             return $rounded . '+';
         }
-        
+
         if ($number < 5000) {
             $rounded = ceil($number / 1000) * 1000;
             return $rounded . '+';
         }
-        
+
         $rounded = ceil($number / 1000);
         return $rounded . 'k+';
     }

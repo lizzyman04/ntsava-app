@@ -17,7 +17,7 @@ $dbConfig = new Config\DatabaseConfig([
     'connections' => [
         'mysql' => new Config\MySQLDriverConfig(
             connection: new Config\MySQL\TcpConnectionConfig(
-                database: env('DB_DATABASE', 'cdn_db'),
+                database: env('DB_DATABASE', 'ntsava_db'),
                 host: env('DB_HOST', 'localhost'),
                 port: (int) env('DB_PORT', 3306),
                 user: env('DB_USERNAME', 'root'),
@@ -27,7 +27,7 @@ $dbConfig = new Config\DatabaseConfig([
         ),
         'sqlite' => new Config\SQLiteDriverConfig(
             connection: new Config\SQLite\FileConnectionConfig(
-                database: env('DB_DATABASE', base_path('database.sqlite'))
+                database: env('DB_DATABASE', base_path('db/database.sqlite'))
             )
         )
     ]

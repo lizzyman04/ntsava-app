@@ -107,31 +107,24 @@ use Fluxor\View;
             <div class="flex gap-4">
                 <div class="flex-shrink-0 w-12 h-12 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center font-bold">1</div>
                 <div>
-                    <h3 class="text-xl font-semibold mb-1">2024 - The Beginning</h3>
+                    <h3 class="text-xl font-semibold mb-1">Feb 12, 2026 - The Beginning</h3>
                     <p class="text-gray-500">Ntsava was founded with a vision to simplify file storage and delivery</p>
                 </div>
             </div>
             <div class="flex gap-4">
                 <div class="flex-shrink-0 w-12 h-12 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center font-bold">2</div>
                 <div>
-                    <h3 class="text-xl font-semibold mb-1">2024 - First Release</h3>
+                    <h3 class="text-xl font-semibold mb-1">March 30, 2026 - First Release</h3>
                     <p class="text-gray-500">Launched core features: upload, storage, and basic CDN delivery</p>
                 </div>
             </div>
-            <div class="flex gap-4">
+            <!-- <div class="flex gap-4">
                 <div class="flex-shrink-0 w-12 h-12 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center font-bold">3</div>
                 <div>
-                    <h3 class="text-xl font-semibold mb-1">2025 - Smart Processing</h3>
+                    <h3 class="text-xl font-semibold mb-1">March 30, 2026 - Smart Processing</h3>
                     <p class="text-gray-500">Added image optimization, resizing, and format conversion</p>
                 </div>
-            </div>
-            <div class="flex gap-4">
-                <div class="flex-shrink-0 w-12 h-12 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center font-bold">4</div>
-                <div>
-                    <h3 class="text-xl font-semibold mb-1">2026 - Global Scale</h3>
-                    <p class="text-gray-500">Expanded infrastructure and launched enterprise features</p>
-                </div>
-            </div>
+            </div> -->
         </div>
     </div>
 </section>
@@ -140,7 +133,7 @@ use Fluxor\View;
 <section class="py-20 bg-primary-600">
     <div class="container mx-auto px-4 text-center">
         <i class="fas fa-quote-left text-4xl text-primary-200 mb-4"></i>
-        <p class="text-xl md:text-2xl text-white max-w-3xl mx-auto mb-6 leading-relaxed">
+        <p class="text-xl md:text-2xl text-gray-800 max-w-3xl mx-auto mb-6 leading-relaxed">
             We believe that technology should empower, not complicate. Ntsava is built to be the simplest, most reliable way to store and deliver your digital assets.
         </p>
         <p class="text-primary-100">— The Ntsava Team</p>

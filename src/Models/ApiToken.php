@@ -8,9 +8,8 @@ use Cycle\Annotated\Annotation\Table;
 use Cycle\Annotated\Annotation\Table\Index;
 use DateTimeInterface;
 use JsonSerializable;
-use Cycle\ORM\Mapper\Mapper;
 
-#[Entity(table: "api_tokens", mapper: ApiTokenMapper::class)]
+#[Entity(table: "api_tokens")]
 #[Table(indexes: [
     new Index(columns: ["token_hash"], unique: true),
     new Index(columns: ["user_id"]),
@@ -30,8 +29,11 @@ class ApiToken implements JsonSerializable
     #[Column(type: "string", length: 100, nullable: false)]
     private string $name;
 
+    /**
+     * @var array|string
+     */
     #[Column(type: "json", nullable: false)]
-    private $permissions = ['upload', 'delete', 'read'];
+    private $permissions;
 
     #[Column(type: "datetime", nullable: true)]
     private ?DateTimeInterface $lastUsedAt = null;
@@ -67,13 +69,40 @@ class ApiToken implements JsonSerializable
     {
         return $this->name;
     }
-    public function getPermissions()
+    
+    /**
+     * Get permissions as array
+     * 
+     * @return array
+     */
+    public function getPermissions(): array
     {
-        if (is_string($this->permissions)) {
-            return json_decode($this->permissions, true);
+        $permissions = $this->permissions;
+        
+        if (is_string($permissions)) {
+            $decoded = json_decode($permissions, true);
+            return is_array($decoded) ? $decoded : ['upload', 'delete', 'read'];
         }
-        return $this->permissions;
+        
+        if (is_array($permissions)) {
+            return $permissions;
+        }
+        
+        return ['upload', 'delete', 'read'];
     }
+    
+    /**
+     * Set permissions from array
+     * 
+     * @param array $permissions
+     * @return self
+     */
+    public function setPermissions(array $permissions): self
+    {
+        $this->permissions = $permissions;
+        return $this;
+    }
+    
     public function getLastUsedAt(): ?DateTimeInterface
     {
         return $this->lastUsedAt;
@@ -85,15 +114,6 @@ class ApiToken implements JsonSerializable
     public function getCreatedAt(): DateTimeInterface
     {
         return $this->createdAt;
-    }
-
-    public function setPermissions($permissions): self
-    {
-        if (is_string($permissions)) {
-            $permissions = json_decode($permissions, true);
-        }
-        $this->permissions = $permissions;
-        return $this;
     }
 
     public function setLastUsedAt(?DateTimeInterface $time): self
@@ -138,26 +158,5 @@ class ApiToken implements JsonSerializable
             'expires_at' => $this->expiresAt?->format('Y-m-d H:i:s'),
             'created_at' => $this->createdAt->format('Y-m-d H:i:s')
         ];
-    }
-}
-
-// Custom Mapper to handle JSON conversion
-class ApiTokenMapper extends Mapper
-{
-    public function hydrate($entity, array $data): object
-    {
-        if (isset($data['permissions']) && is_string($data['permissions'])) {
-            $data['permissions'] = json_decode($data['permissions'], true);
-        }
-        return parent::hydrate($entity, $data);
-    }
-
-    public function extract($entity): array
-    {
-        $data = parent::extract($entity);
-        if (isset($data['permissions']) && is_array($data['permissions'])) {
-            $data['permissions'] = json_encode($data['permissions']);
-        }
-        return $data;
     }
 }

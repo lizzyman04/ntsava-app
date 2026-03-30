@@ -7,8 +7,9 @@ use Cycle\Annotated\Annotation\Entity;
 use Cycle\Annotated\Annotation\Table;
 use Cycle\Annotated\Annotation\Table\Index;
 use DateTimeInterface;
+use Cycle\ORM\Mapper\Mapper;
 
-#[Entity(table: "credit_transactions")]
+#[Entity(table: "credit_transactions", mapper: CreditTransactionMapper::class)]
 #[Table(indexes: [
     new Index(columns: ["user_id"]),
     new Index(columns: ["type"]),
@@ -41,8 +42,11 @@ class CreditTransaction
     #[Column(type: "string", length: 100, nullable: true)]
     private ?string $referenceId = null;
 
+    /**
+     * @var array|string|null
+     */
     #[Column(type: "json", nullable: true)]
-    private ?array $metadata = null;
+    private $metadata = null;
 
     #[Column(type: "datetime", name: "created_at")]
     private DateTimeInterface $createdAt;
@@ -94,10 +98,32 @@ class CreditTransaction
     {
         return $this->referenceId;
     }
+    
+    /**
+     * Get metadata as array
+     * 
+     * @return array|null
+     */
     public function getMetadata(): ?array
     {
-        return $this->metadata;
+        $metadata = $this->metadata;
+        
+        if ($metadata === null) {
+            return null;
+        }
+        
+        if (is_string($metadata)) {
+            $decoded = json_decode($metadata, true);
+            return is_array($decoded) ? $decoded : null;
+        }
+        
+        if (is_array($metadata)) {
+            return $metadata;
+        }
+        
+        return null;
     }
+    
     public function getCreatedAt(): DateTimeInterface
     {
         return $this->createdAt;
@@ -113,11 +139,16 @@ class CreditTransaction
         $this->referenceId = $referenceId;
         return $this;
     }
+    
+    /**
+     * Set metadata from array
+     */
     public function setMetadata(?array $metadata): self
     {
         $this->metadata = $metadata;
         return $this;
     }
+    
     public function isPurchase(): bool
     {
         return $this->type === 'purchase';
@@ -129,5 +160,25 @@ class CreditTransaction
     public function isDowngrade(): bool
     {
         return $this->type === 'downgrade_plan';
+    }
+}
+
+class CreditTransactionMapper extends Mapper
+{
+    public function hydrate($entity, array $data): object
+    {
+        if (isset($data['metadata']) && is_string($data['metadata'])) {
+            $data['metadata'] = json_decode($data['metadata'], true);
+        }
+        return parent::hydrate($entity, $data);
+    }
+
+    public function extract($entity): array
+    {
+        $data = parent::extract($entity);
+        if (isset($data['metadata']) && is_array($data['metadata'])) {
+            $data['metadata'] = json_encode($data['metadata']);
+        }
+        return $data;
     }
 }

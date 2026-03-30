@@ -61,8 +61,8 @@
 
 ```bash
 # Clone the repository
-git clone https://github.com/lizzyman04/cdn.tudocomlizzyman.com
-cd cdn.tudocomlizzyman.com
+git clone https://github.com/lizzyman04/ntsava-app
+cd ntsava-app
 
 # Install dependencies
 composer install

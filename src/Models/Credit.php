@@ -36,8 +36,9 @@ class Credit
     public function __construct(int $userId)
     {
         $this->userId = $userId;
-        $this->createdAt = new \DateTime();
-        $this->updatedAt = new \DateTime();
+        $now = new \DateTime();
+        $this->createdAt = $now;
+        $this->updatedAt = $now;
     }
 
     public function getId(): int
@@ -68,21 +69,25 @@ class Credit
     public function setAmount(float $amount): self
     {
         $this->amount = $amount;
+        $this->updatedAt = new \DateTime();
         return $this;
     }
     public function setCurrency(string $currency): self
     {
         $this->currency = $currency;
+        $this->updatedAt = new \DateTime();
         return $this;
     }
     public function add(float $amount): self
     {
         $this->amount += $amount;
+        $this->updatedAt = new \DateTime();
         return $this;
     }
     public function subtract(float $amount): self
     {
         $this->amount -= $amount;
+        $this->updatedAt = new \DateTime();
         return $this;
     }
     public function hasEnough(float $amount): bool

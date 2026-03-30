@@ -37,24 +37,37 @@ class TokenService
     public function listTokens(int $userId): array
     {
         $tokenRepo = ORMHelper::getRepository(ApiToken::class);
-        $tokens = $tokenRepo->findAll(['userId' => $userId]);
+        $allTokens = $tokenRepo->findAll();
+        $tokens = [];
         
-        return array_map(function($token) {
-            return [
-                'id' => $token->getId(),
-                'name' => $token->getName(),
-                'permissions' => $token->getPermissions(),
-                'last_used_at' => $token->getLastUsedAt()?->format('Y-m-d H:i:s'),
-                'expires_at' => $token->getExpiresAt()?->format('Y-m-d H:i:s'),
-                'created_at' => $token->getCreatedAt()->format('Y-m-d H:i:s')
-            ];
-        }, $tokens);
+        foreach ($allTokens as $token) {
+            if ($token->getUserId() === $userId) {
+                $tokens[] = [
+                    'id' => $token->getId(),
+                    'name' => $token->getName(),
+                    'permissions' => $token->getPermissions(),
+                    'last_used_at' => $token->getLastUsedAt()?->format('Y-m-d H:i:s'),
+                    'expires_at' => $token->getExpiresAt()?->format('Y-m-d H:i:s'),
+                    'created_at' => $token->getCreatedAt()->format('Y-m-d H:i:s')
+                ];
+            }
+        }
+        
+        return $tokens;
     }
     
     public function revokeToken(int $userId, int $tokenId): bool
     {
         $tokenRepo = ORMHelper::getRepository(ApiToken::class);
-        $token = $tokenRepo->findOne(['id' => $tokenId, 'userId' => $userId]);
+        $allTokens = $tokenRepo->findAll();
+        $token = null;
+        
+        foreach ($allTokens as $t) {
+            if ($t->getId() === $tokenId && $t->getUserId() === $userId) {
+                $token = $t;
+                break;
+            }
+        }
         
         if (!$token) {
             return false;

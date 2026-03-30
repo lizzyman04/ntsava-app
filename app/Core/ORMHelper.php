@@ -3,12 +3,15 @@
 namespace App\Core;
 
 use Cycle\ORM\ORM;
+use Cycle\ORM\Select;
 use Cycle\ORM\EntityManager;
 use Cycle\ORM\Select\Repository;
+use Cycle\Database\DatabaseManager;
 
 class ORMHelper
 {
     private static ?ORM $orm = null;
+    private static ?DatabaseManager $dbManager = null;
 
     public static function getORM(): ORM
     {
@@ -16,6 +19,14 @@ class ORMHelper
             self::$orm = require base_path('db/core/orm.php');
         }
         return self::$orm;
+    }
+
+    public static function getDatabaseManager(): DatabaseManager
+    {
+        if (self::$dbManager === null) {
+            self::$dbManager = require base_path('db/core/connection.php');
+        }
+        return self::$dbManager;
     }
 
     public static function getRepository(string $entityClass): Repository
@@ -26,6 +37,11 @@ class ORMHelper
     public static function getManager(): EntityManager
     {
         return new EntityManager(self::getORM());
+    }
+
+    public static function select(string $entityClass): Select
+    {
+        return self::getRepository($entityClass)->select();
     }
 
     public static function findByPK(string $entityClass, $id): ?object

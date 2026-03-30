@@ -22,6 +22,7 @@
                 <?php if (!\App\Core\Auth::check()): ?>
                 <div class="hidden lg:flex space-x-6">
                     <a href="/about" class="text-gray-600 hover:text-primary-600 transition-colors duration-200">About</a>
+                    <a href="/docs" class="text-gray-600 hover:text-primary-600 transition-colors duration-200">API Docs</a>
                     <a href="/terms" class="text-gray-600 hover:text-primary-600 transition-colors duration-200">Terms of Service</a>
                     <a href="/privacy" class="text-gray-600 hover:text-primary-600 transition-colors duration-200">Privacy Policy</a>
                     <a href="/contact" class="text-gray-600 hover:text-primary-600 transition-colors duration-200">Contact</a>

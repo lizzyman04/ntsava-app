@@ -4,7 +4,9 @@
 
 $(document).ready(function () {
     window.upgradePlan = function (planSlug) {
-        if (!confirm('Upgrade to ' + planSlug.toUpperCase() + ' plan? This will use your credits.')) {
+        var confirmMessage = 'Upgrade to ' + planSlug.toUpperCase() + ' plan? This will use your credits.';
+        
+        if (!confirm(confirmMessage)) {
             return;
         }
 
@@ -18,7 +20,8 @@ $(document).ready(function () {
             },
             success: function (response) {
                 if (response.success) {
-                    window.Toast.show('Plan upgraded successfully!', 'success');
+                    var message = response.data.is_downgrade ? 'Downgraded' : 'Upgraded';
+                    window.Toast.show(message + ' to ' + response.data.plan + ' successfully!', 'success');
                     setTimeout(function () {
                         window.location.reload();
                     }, 1500);
@@ -28,7 +31,7 @@ $(document).ready(function () {
             },
             error: function (xhr) {
                 var response = xhr.responseJSON;
-                window.Toast.show(response?.message || 'Failed to upgrade plan', 'error');
+                window.Toast.show(response?.message || 'Failed to change plan', 'error');
             }
         });
     };
