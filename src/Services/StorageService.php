@@ -8,6 +8,29 @@ use App\Core\ORMHelper;
 
 class StorageService
 {
+    private const MIME_TYPES = [
+        'jpg' => ['image/jpeg', 'image/jpg'],
+        'jpeg' => ['image/jpeg'],
+        'png' => ['image/png'],
+        'gif' => ['image/gif'],
+        'webp' => ['image/webp'],
+        'svg' => ['image/svg+xml'],
+        'ico' => ['image/x-icon', 'image/vnd.microsoft.icon'],
+        'mp4' => ['video/mp4'],
+        'mp3' => ['audio/mpeg'],
+        'wav' => ['audio/wav', 'audio/x-wav'],
+        'ogg' => ['audio/ogg', 'video/ogg'],
+        'pdf' => ['application/pdf'],
+        'doc' => ['application/msword'],
+        'docx' => ['application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
+        'txt' => ['text/plain'],
+        'json' => ['application/json'],
+        'xml' => ['application/xml', 'text/xml'],
+        'css' => ['text/css'],
+    ];
+
+    private const DANGEROUS_EXTENSIONS = ['svg', 'html', 'htm', 'xml'];
+
     public function upload(User $user, array $file, string $path = ''): array
     {
         try {
@@ -25,6 +48,16 @@ class StorageService
 
             if (!in_array($extension, $allowedTypes)) {
                 return ['success' => false, 'error' => "File type '{$extension}' not allowed"];
+            }
+
+            $mimeValidation = $this->validateMimeType($file['tmp_name'], $extension);
+            if ($mimeValidation !== true) {
+                return ['success' => false, 'error' => $mimeValidation];
+            }
+
+            $contentValidation = $this->validateFileContent($file['tmp_name'], $extension);
+            if ($contentValidation !== true) {
+                return ['success' => false, 'error' => $contentValidation];
             }
 
             $storagePath = $user->getStoragePath();
@@ -101,6 +134,82 @@ class StorageService
         } catch (\Exception $e) {
             return ['success' => false, 'error' => $e->getMessage()];
         }
+    }
+
+    private function validateMimeType(string $filePath, string $extension): true|string
+    {
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mimeType = finfo_file($finfo, $filePath);
+        finfo_close($finfo);
+
+        $allowedMimes = self::MIME_TYPES[$extension] ?? [];
+
+        if (!empty($allowedMimes) && !in_array($mimeType, $allowedMimes)) {
+            return sprintf(
+                'File MIME type mismatch: expected %s, got %s',
+                implode(' or ', $allowedMimes),
+                $mimeType
+            );
+        }
+
+        return true;
+    }
+
+    private function validateFileContent(string $filePath, string $extension): true|string
+    {
+        if (in_array($extension, self::DANGEROUS_EXTENSIONS)) {
+            $content = file_get_contents($filePath);
+
+            if (preg_match('/<script\b[^>]*>.*?<\/script>/is', $content)) {
+                return 'File contains potentially malicious script tags';
+            }
+
+            if (preg_match('/\bon\w+\s*=/i', $content)) {
+                return 'File contains potentially malicious event handlers';
+            }
+
+            if (preg_match('/javascript\s*:/i', $content)) {
+                return 'File contains potentially malicious javascript: URLs';
+            }
+        }
+
+        if ($extension === 'zip') {
+            $zipValidation = $this->validateZipContent($filePath);
+            if ($zipValidation !== true) {
+                return $zipValidation;
+            }
+        }
+
+        return true;
+    }
+
+    private function validateZipContent(string $filePath): true|string
+    {
+        if (!class_exists('ZipArchive')) {
+            return true;
+        }
+
+        $zip = new \ZipArchive();
+        if ($zip->open($filePath) === true) {
+            for ($i = 0; $i < $zip->numFiles; $i++) {
+                $name = $zip->getNameIndex($i);
+                $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
+                $forbidden = ['php', 'phtml', 'php3', 'php4', 'php5', 'phar', 'inc', 'js', 'html', 'htm'];
+
+                if (in_array($ext, $forbidden)) {
+                    $zip->close();
+                    return 'ZIP file contains forbidden file types';
+                }
+
+                if (strpos($name, '../') !== false || strpos($name, '..\\') !== false) {
+                    $zip->close();
+                    return 'ZIP file contains path traversal attempts';
+                }
+            }
+            $zip->close();
+        }
+
+        return true;
     }
 
     private function getUploadErrorMessage($code): string

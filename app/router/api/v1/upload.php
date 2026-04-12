@@ -6,17 +6,15 @@ use Fluxor\Response;
 use Source\Services\StorageService;
 
 Flow::POST()->do(function ($req) {
-    // Apply auth middleware
     $auth = new ApiAuthMiddleware();
     $authResult = $auth->handle($req);
     if ($authResult !== null) {
         return $authResult;
     }
 
-    $user = $req->user;
-    $apiToken = $req->apiToken;
+    $user = $req->getAttribute('user');
+    $apiToken = $req->getAttribute('apiToken');
 
-    // Check permission
     if (!$apiToken->hasPermission('upload')) {
         return Response::error('Token does not have upload permission', 403);
     }
@@ -28,7 +26,6 @@ Flow::POST()->do(function ($req) {
         return Response::error('No file uploaded', 400);
     }
 
-    // Check storage quota
     if (!$user->hasStorageAvailable($file['size'])) {
         return Response::error('Storage quota exceeded', 403, [
             'used' => $user->getStorageUsedBytes(),
@@ -38,7 +35,6 @@ Flow::POST()->do(function ($req) {
         ]);
     }
 
-    // Upload file
     $storageService = new StorageService();
     $result = $storageService->upload($user, $file, $path);
 

@@ -371,17 +371,11 @@ use Fluxor\View;
                 <span class="endpoint-url">/resize</span>
             </div>
             <p class="text-gray-600 mb-3">
-                Resize and transform images on the fly.
-                <span class="inline-block bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full ml-2">Public
-                    Endpoint</span>
-                <span class="inline-block bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full ml-2">No
-                    Authentication Required</span>
+                On-the-fly image manipulation: resize, crop, filter, rotate, flip, and more.
+                <span class="inline-block bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full ml-2">Public</span>
+                <span class="inline-block bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full ml-2">No Auth
+                    Required</span>
             </p>
-
-            <div class="bg-green-50 border border-green-200 rounded-lg p-3 mb-4">
-                <i class="fas fa-globe text-green-600 mr-2"></i>
-                <span class="text-sm text-green-700">This endpoint is publicly accessible. No API tokens needed.</span>
-            </div>
 
             <h4 class="font-semibold mt-4 mb-2">Parameters</h4>
             <table class="param-table">
@@ -394,90 +388,141 @@ use Fluxor\View;
                 </thead>
                 <tbody>
                     <tr>
-                        <td><code class="bg-gray-100 px-1 rounded">photo</code></td>
+                        <td><code>photo</code></td>
                         <td>string</td>
-                        <td>
-                            Full path to the image: <code>u/username/path/to/image.jpg</code><br>
-                            <span class="text-xs text-gray-500">Example: <code>u/johndoe/photos/summer.jpg</code></span>
+                        <td><strong>Required.</strong> <code>u/username/path/to/image.jpg</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>w</code>, <code>h</code></td>
+                        <td>int</td>
+                        <td>Target dimensions (1-4096)</td>
+                    </tr>
+                    <tr>
+                        <td><code>format</code></td>
+                        <td>string</td>
+                        <td><code>jpg</code>, <code>png</code>, <code>webp</code>, <code>gif</code>, <code>avif</code>
                         </td>
                     </tr>
                     <tr>
-                        <td><code class="bg-gray-100 px-1 rounded">w</code></td>
+                        <td><code>q</code></td>
                         <td>int</td>
-                        <td>Target width in pixels (optional)</td>
+                        <td>Quality 1-100 (default: 85 for JPEG, 80 for WebP)</td>
                     </tr>
                     <tr>
-                        <td><code class="bg-gray-100 px-1 rounded">h</code></td>
-                        <td>int</td>
-                        <td>Target height in pixels (optional)</td>
-                    </tr>
-                    <tr>
-                        <td><code class="bg-gray-100 px-1 rounded">format</code></td>
+                        <td><code>fit</code></td>
                         <td>string</td>
-                        <td>Output format: <code>jpg</code>, <code>png</code>, <code>webp</code>, <code>gif</code>
-                            (optional)</td>
+                        <td><code>cover</code> (default), <code>contain</code>, <code>fill</code>, <code>inside</code>,
+                            <code>outside</code></td>
                     </tr>
                     <tr>
-                        <td><code class="bg-gray-100 px-1 rounded">filter</code></td>
+                        <td><code>crop</code></td>
                         <td>string</td>
-                        <td>Image filter: <code>grayscale</code>, <code>blur</code>, <code>brightness</code>,
-                            <code>contrast</code> (optional)
-                        </td>
+                        <td><code>center</code> (default), <code>top</code>, <code>bottom</code>, <code>left</code>,
+                            <code>right</code>, <code>smart</code></td>
                     </tr>
                     <tr>
-                        <td><code class="bg-gray-100 px-1 rounded">blur</code></td>
-                        <td>int</td>
-                        <td>Blur intensity (1-10) (optional)</td>
+                        <td><code>filter</code></td>
+                        <td>string</td>
+                        <td><code>grayscale</code>, <code>sepia</code>, <code>blur</code>, <code>brightness</code>,
+                            <code>contrast</code>, <code>sharpen</code>, <code>edges</code>, <code>emboss</code>,
+                            <code>negate</code></td>
                     </tr>
                     <tr>
-                        <td><code class="bg-gray-100 px-1 rounded">brightness</code></td>
+                        <td><code>blur</code></td>
                         <td>int</td>
-                        <td>Brightness adjustment (-255 to 255) (optional)</td>
+                        <td>Blur intensity 1-20</td>
                     </tr>
                     <tr>
-                        <td><code class="bg-gray-100 px-1 rounded">contrast</code></td>
+                        <td><code>brightness</code></td>
                         <td>int</td>
-                        <td>Contrast adjustment (-100 to 100) (optional)</td>
+                        <td>-255 to 255</td>
                     </tr>
                     <tr>
-                        <td><code class="bg-gray-100 px-1 rounded">sharpen</code></td>
+                        <td><code>contrast</code></td>
                         <td>int</td>
-                        <td>Sharpen intensity (1-10) (optional)</td>
+                        <td>-100 to 100</td>
+                    </tr>
+                    <tr>
+                        <td><code>sharpen</code></td>
+                        <td>int</td>
+                        <td>1-10</td>
+                    </tr>
+                    <tr>
+                        <td><code>smooth</code></td>
+                        <td>int</td>
+                        <td>1-10</td>
+                    </tr>
+                    <tr>
+                        <td><code>pixelate</code></td>
+                        <td>int</td>
+                        <td>Block size 1-50</td>
+                    </tr>
+                    <tr>
+                        <td><code>rotate</code></td>
+                        <td>int</td>
+                        <td>Degrees 0-359 (clockwise)</td>
+                    </tr>
+                    <tr>
+                        <td><code>flip</code></td>
+                        <td>string</td>
+                        <td><code>h</code>, <code>v</code>, <code>both</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>auto_orient</code></td>
+                        <td>bool</td>
+                        <td>Fix EXIF orientation (default: true)</td>
+                    </tr>
+                    <tr>
+                        <td><code>bg</code></td>
+                        <td>string</td>
+                        <td>Background: hex (<code>#FFF</code>), RGB (<code>255,255,255</code>), or named
+                            (<code>white</code>, <code>black</code>, <code>transparent</code>)</td>
+                    </tr>
+                    <tr>
+                        <td><code>watermark</code></td>
+                        <td>url</td>
+                        <td>PNG image URL (bottom-right, 50% opacity)</td>
+                    </tr>
+                    <tr>
+                        <td><code>return</code></td>
+                        <td>string</td>
+                        <td>Use <code>return=json</code> to get metadata instead of redirect</td>
                     </tr>
                 </tbody>
             </table>
 
-            <h4 class="font-semibold mt-4 mb-2">Examples</h4>
-
-            <p class="text-sm text-gray-600 mb-2">Resize to 800px width (maintains aspect ratio):</p>
-            <div class="code-block mb-3">
-                <code>
-                    https://cdn.omeu.space/api/v1/resize?photo=u/johndoe/photos/summer.jpg&w=800
-                </code>
-            </div>
-
-            <p class="text-sm text-gray-600 mb-2">Resize to 800x600 and convert to WebP:</p>
-            <div class="code-block mb-3">
-                <code>
-                    https://cdn.omeu.space/api/v1/resize?photo=u/johndoe/photos/summer.jpg&w=800&h=600&format=webp
-                </code>
-            </div>
-
-            <p class="text-sm text-gray-600 mb-2">Apply grayscale filter and resize:</p>
-            <div class="code-block mb-3">
-                <code>
-                    https://cdn.omeu.space/api/v1/resize?photo=u/johndoe/photos/summer.jpg&w=800&filter=grayscale
-                </code>
-            </div>
-
-            <p class="text-sm text-gray-600 mb-2">Blur effect:</p>
+            <h4 class="font-semibold mt-4 mb-2">Quick Examples</h4>
             <div class="code-block">
                 <code>
-                    https://cdn.omeu.space/api/v1/resize?photo=u/johndoe/photos/summer.jpg&blur=5&w=800
-                </code>
+# Resize to 800px width<br>
+/resize?photo=u/johndoe/summer.jpg&w=800<br><br>
+# Crop to 800x600<br>
+/resize?photo=u/johndoe/summer.jpg&w=800&h=600&fit=cover&crop=center<br><br>
+# Convert to WebP with quality 85<br>
+/resize?photo=u/johndoe/summer.jpg&w=800&format=webp&q=85<br><br>
+# Sepia + rotate + flip<br>
+/resize?photo=u/johndoe/summer.jpg&w=800&filter=sepia&rotate=90&flip=h<br><br>
+# Pixelate effect<br>
+/resize?photo=u/johndoe/summer.jpg&w=400&pixelate=8<br><br>
+# Get JSON metadata (no redirect)<br>
+/resize?photo=u/johndoe/summer.jpg&w=800&return=json
+        </code>
+            </div>
+
+            <h4 class="font-semibold mt-4 mb-2">JSON Response</h4>
+            <div class="code-block">
+                <code>
+{"success":true,"url":"https://.../cache/abc.jpg","width":800,"height":600,"size":245760,"cached":false}
+        </code>
+            </div>
+
+            <div class="text-sm text-gray-500 mt-3 space-y-1">
+                <p><i class="fas fa-chart-line mr-1"></i> <strong>Limits:</strong> Max 4096x4096 px | Source up to 100
+                    MB | Cached for 7 days</p>
+                <p><i class="fas fa-info-circle mr-1"></i> Use <code>return=json</code> to get metadata without
+                    redirect. Default behavior redirects to the image.</p>
             </div>
         </div>
-
         <!-- Error Responses -->
         <div class="glass-card p-8">
             <h2 class="text-2xl font-bold text-gray-900 mb-4">Error Responses</h2>
