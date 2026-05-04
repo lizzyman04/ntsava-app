@@ -18,11 +18,11 @@
         "cycle/database": "^2.16",
         "cycle/annotated": "^4.4",
         "cycle/schema-builder": "^2.11",
-        "spiral/tokenizer": "^3.16",
-        "robmorgan/phinx": "^0.16"
+        "spiral/tokenizer": "^3.16"
     },
     "require-dev": {
-        "phpunit/phpunit": "^10.0"
+        "phpunit/phpunit": "^10.0",
+        "robmorgan/phinx": "^0.16.11"
     },
     "autoload": {
         "psr-4": {
