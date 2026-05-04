@@ -10,6 +10,15 @@ $(document).ready(function () {
     var queueList = $('#queueList');
     var files = [];
 
+    var maxSize = parseInt(dropZone.data('max-size'), 10) || 0;
+    var allowedTypes = (dropZone.data('allowed-types') || '').split(',').map(function (t) { return t.trim().toLowerCase(); }).filter(Boolean);
+
+    function formatSize(bytes) {
+        if (bytes >= 1073741824) return (bytes / 1073741824).toFixed(1) + ' GB';
+        if (bytes >= 1048576) return Math.round(bytes / 1048576) + ' MB';
+        return Math.round(bytes / 1024) + ' KB';
+    }
+
     dropZone.on('click', function (e) {
         e.stopPropagation();
         fileInput[0].click();
@@ -48,7 +57,20 @@ $(document).ready(function () {
 
     function handleFiles(selectedFiles) {
         for (var i = 0; i < selectedFiles.length; i++) {
-            files.push(selectedFiles[i]);
+            var file = selectedFiles[i];
+
+            if (maxSize > 0 && file.size > maxSize) {
+                window.Toast.show(escapeHtml(file.name) + ': exceeds the ' + formatSize(maxSize) + ' limit for your plan', 'error');
+                continue;
+            }
+
+            var ext = file.name.split('.').pop().toLowerCase();
+            if (allowedTypes.length > 0 && allowedTypes.indexOf(ext) === -1) {
+                window.Toast.show(escapeHtml(file.name) + ': .' + ext + ' is not allowed on your plan', 'error');
+                continue;
+            }
+
+            files.push(file);
         }
         updateQueue();
     }
