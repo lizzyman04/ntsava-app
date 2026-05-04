@@ -5,6 +5,22 @@ use Fluxor\Response;
 use Source\Services\StorageService;
 use App\Middleware\ApiAuthMiddleware;
 
+Flow::cors([
+    'allowed_origins' => ['*'],
+    'allowed_methods' => ['DELETE', 'OPTIONS'],
+    'allowed_headers' => [
+        'Content-Type',
+        'Authorization',
+        'X-Token',
+        'X-User-Uuid'
+    ],
+    'max_age' => 86400
+]);
+
+Flow::OPTIONS()->do(function($req) {
+    return Response::text('', 204);
+});
+
 Flow::DELETE()->do(function ($req) {
     $auth = new ApiAuthMiddleware();
     $authResult = $auth->handle($req);
