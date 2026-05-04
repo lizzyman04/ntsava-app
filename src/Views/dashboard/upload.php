@@ -42,12 +42,24 @@ upload
         <p class="text-gray-500 mt-1">Drag and drop files or click to select</p>
     </div>
 
-    <div class="drop-zone" id="dropZone">
+    <div class="drop-zone" id="dropZone"
+         data-max-size="<?= $max_size ?>"
+         data-allowed-types="<?= htmlspecialchars($allowed_types) ?>">
         <i class="fas fa-cloud-upload-alt text-5xl text-gray-400 mb-4"></i>
         <p class="text-gray-600">Drag & drop files here or click to select</p>
-        <p class="text-sm text-gray-500 mt-2">Max size: <?= round($max_size / 1048576, 2) ?> MB</p>
-        <p class="text-sm text-gray-500">Allowed: <?= $allowed_types ?></p>
-        <input type="file" id="fileInput" style="display: none;" multiple>
+        <p class="text-sm text-gray-500 mt-2">
+            Max size: <span class="font-medium"><?= format_file_size($max_size) ?></span>
+            <?php if ($plan): ?>
+                <span class="text-xs text-gray-400">(<?= htmlspecialchars($plan->getName()) ?> plan)</span>
+            <?php endif; ?>
+        </p>
+        <div class="flex flex-wrap gap-1 justify-center mt-2">
+            <?php foreach (explode(',', $allowed_types) as $type): ?>
+                <span class="inline-block px-1.5 py-0.5 rounded text-xs bg-gray-100 text-gray-600 font-mono">.<?= htmlspecialchars(trim($type)) ?></span>
+            <?php endforeach; ?>
+        </div>
+        <input type="file" id="fileInput" style="display: none;" multiple
+               accept="<?= implode(',', array_map(fn($t) => '.' . trim($t), explode(',', $allowed_types))) ?>">
     </div>
 
     <div class="mt-6">
