@@ -3,19 +3,26 @@
 namespace Source\Controllers\Dashboard;
 
 use Fluxor\Response;
+use Source\Models\Plan;
 use Source\Services\StorageService;
+use App\Core\ORMHelper;
 
 class UploadController extends DashboardController
 {
     public function index()
     {
+        $plan = ORMHelper::findByPK(Plan::class, $this->user->getPlanId());
+        $maxSize = $plan ? $plan->getMaxFileSizeBytes() : 10485760;
+        $allowedTypes = $plan ? implode(',', $plan->getAllowedMimeTypes()) : 'jpg,jpeg,png,gif,webp';
+
         return Response::view('dashboard/upload', [
             'title' => 'Upload Files',
             'page_title' => 'Upload Files',
             'active_menu' => 'upload',
             'user' => $this->user,
-            'max_size' => env('UPLOAD_MAX_SIZE', 104857600),
-            'allowed_types' => env('UPLOAD_ALLOWED_TYPES', 'jpg,jpeg,png,gif,webp,mp4,pdf')
+            'plan' => $plan,
+            'max_size' => $maxSize,
+            'allowed_types' => $allowedTypes
         ]);
     }
 

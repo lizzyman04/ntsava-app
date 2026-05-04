@@ -35,6 +35,12 @@ class Plan
     #[Column(type: "bigInteger", name: "bandwidth_limit_bytes", nullable: false)]
     private int $bandwidthLimitBytes;
 
+    #[Column(type: "bigInteger", name: "max_file_size_bytes", nullable: false)]
+    private int $maxFileSizeBytes = 10485760;
+
+    #[Column(type: "text", name: "allowed_mime_types", nullable: false)]
+    private string $allowedMimeTypes = '["jpg","jpeg","png","gif","webp"]';
+
     #[Column(type: "decimal", precision: 10, scale: 2, nullable: false)]
     private float $price = 0.00;
 
@@ -83,6 +89,14 @@ class Plan
     public function getBandwidthLimitBytes(): int
     {
         return $this->bandwidthLimitBytes;
+    }
+    public function getMaxFileSizeBytes(): int
+    {
+        return $this->maxFileSizeBytes;
+    }
+    public function getAllowedMimeTypes(): array
+    {
+        return json_decode($this->allowedMimeTypes, true) ?? ['jpg', 'jpeg', 'png', 'gif', 'webp'];
     }
     public function getPrice(): float
     {
@@ -133,6 +147,16 @@ class Plan
     public function setBandwidthLimitBytes(int $bytes): self
     {
         $this->bandwidthLimitBytes = $bytes;
+        return $this;
+    }
+    public function setMaxFileSizeBytes(int $bytes): self
+    {
+        $this->maxFileSizeBytes = $bytes;
+        return $this;
+    }
+    public function setAllowedMimeTypes(array $types): self
+    {
+        $this->allowedMimeTypes = json_encode($types);
         return $this;
     }
     public function setPrice(float $price): self

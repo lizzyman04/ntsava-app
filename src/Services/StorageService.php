@@ -4,6 +4,7 @@ namespace Source\Services;
 
 use Source\Models\User;
 use Source\Models\File;
+use Source\Models\Plan;
 use App\Core\ORMHelper;
 
 class StorageService
@@ -17,6 +18,7 @@ class StorageService
         'svg' => ['image/svg+xml'],
         'ico' => ['image/x-icon', 'image/vnd.microsoft.icon'],
         'mp4' => ['video/mp4'],
+        'mov' => ['video/quicktime'],
         'mp3' => ['audio/mpeg'],
         'wav' => ['audio/wav', 'audio/x-wav'],
         'ogg' => ['audio/ogg', 'video/ogg'],
@@ -38,16 +40,28 @@ class StorageService
                 return ['success' => false, 'error' => 'Upload error: ' . $this->getUploadErrorMessage($file['error'])];
             }
 
-            $maxSize = (int) env('UPLOAD_MAX_SIZE', 104857600);
+            $plan = ORMHelper::findByPK(Plan::class, $user->getPlanId());
+            $maxSize = $plan ? $plan->getMaxFileSizeBytes() : 10485760;
+            $allowedTypes = $plan ? $plan->getAllowedMimeTypes() : ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+            $planName = $plan ? $plan->getName() : 'current';
+
             if ($file['size'] > $maxSize) {
-                return ['success' => false, 'error' => "File too large. Max size: " . round($maxSize / 1048576, 2) . "MB"];
+                return ['success' => false, 'error' => sprintf(
+                    "File too large for the %s plan. Max size: %.0fMB",
+                    $planName,
+                    $maxSize / 1048576
+                )];
             }
 
-            $allowedTypes = explode(',', env('UPLOAD_ALLOWED_TYPES', 'jpg,jpeg,png,gif,webp,mp4,pdf'));
             $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
 
             if (!in_array($extension, $allowedTypes)) {
-                return ['success' => false, 'error' => "File type '{$extension}' not allowed"];
+                return ['success' => false, 'error' => sprintf(
+                    "File type '%s' is not allowed on the %s plan. Allowed: %s",
+                    $extension,
+                    $planName,
+                    implode(', ', $allowedTypes)
+                )];
             }
 
             $mimeValidation = $this->validateMimeType($file['tmp_name'], $extension);
