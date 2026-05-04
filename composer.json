@@ -2,12 +2,12 @@
     "name": "lizzyman04/ntsava-app",
     "description": "Ntsava App - Fluxor PHP Framework Application",
     "type": "project",
-    "license": "MIT",
+    "license": "AGPL-3.0-only",
     "authors": [
         {
             "name": "Arlindo Abdul",
             "email": "admin@tudocomlizzyman.com",
-            "homepage": "https://lizzyman04.omeu.space",
+            "homepage": "https://lizzyman04.com",
             "role": "Developer"
         }
     ],
@@ -18,7 +18,8 @@
         "cycle/database": "^2.16",
         "cycle/annotated": "^4.4",
         "cycle/schema-builder": "^2.11",
-        "spiral/tokenizer": "^3.16"
+        "spiral/tokenizer": "^3.16",
+        "robmorgan/phinx": "^0.16"
     },
     "require-dev": {
         "phpunit/phpunit": "^10.0"
@@ -30,8 +31,12 @@
         }
     },
     "scripts": {
-        "migrate": "php db/scripts/migrate-all.php",
-        "migrate:run": "php db/scripts/migrate.php",
+        "migrate": "vendor/bin/phinx migrate -c db/core/phinx.php",
+        "migrate:rollback": "vendor/bin/phinx rollback -c db/core/phinx.php",
+        "migrate:rollback:all": "vendor/bin/phinx rollback -c db/core/phinx.php -t 0",
+        "migrate:status": "vendor/bin/phinx status -c db/core/phinx.php",
+        "migration:create": "vendor/bin/phinx create -c db/core/phinx.php",
+        "seed": "vendor/bin/phinx seed:run -c db/core/phinx.php",
         "dev": "php -S localhost:8000 -t public",
         "prod": "php -S 0.0.0.0:8000 -t public",
         "test": "phpunit"
