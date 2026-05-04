@@ -25,7 +25,7 @@ class PageController extends Controller
         }
 
         $planRepo = ORMHelper::getRepository(Plan::class);
-        $plans = $planRepo->findAll(['isActive' => true]);
+        $plans = $planRepo->findAll(['is_active' => true]);
 
         usort($plans, function ($a, $b) {
             return $a->getSortOrder() <=> $b->getSortOrder();
@@ -99,7 +99,7 @@ class PageController extends Controller
         $success = $this->request->input('success') === '1';
 
         $planRepo = ORMHelper::getRepository(Plan::class);
-        $plans = $planRepo->findAll(['isActive' => true]);
+        $plans = $planRepo->findAll(['is_active' => true]);
 
         usort($plans, function ($a, $b) {
             return $a->getSortOrder() <=> $b->getSortOrder();
