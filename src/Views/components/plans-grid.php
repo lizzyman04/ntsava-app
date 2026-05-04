@@ -1,7 +1,7 @@
 <?php
 /**
  * Plans Grid Component
- * 
+ *
  * @var array $plans
  *   - name: string
  *   - slug: string
@@ -9,9 +9,14 @@
  *   - price_usd: float
  *   - storage_gb: string|float
  *   - bandwidth_gb: string|float
+ *   - max_file_size_bytes: int
+ *   - allowed_mime_types: string[]
  *   - is_popular: bool
  *   - description: string|null
  */
+if (!function_exists('format_file_size')) {
+    require_once __DIR__ . '/helpers.php';
+}
 ?>
 <div class="grid md:grid-cols-4 gap-6 max-w-6xl mx-auto">
     <?php foreach ($plans as $plan): ?>
@@ -62,6 +67,22 @@
                     <i class="fas fa-check-circle text-green-500"></i>
                     <span>API Access</span>
                 </li>
+                <?php if (!empty($plan['max_file_size_bytes'])): ?>
+                <li class="flex items-center gap-2">
+                    <i class="fas fa-check-circle text-green-500"></i>
+                    <span>Up to <?= format_file_size($plan['max_file_size_bytes']) ?> per file</span>
+                </li>
+                <?php endif; ?>
+                <?php if (!empty($plan['allowed_mime_types'])): ?>
+                <li class="flex items-center gap-2 flex-wrap">
+                    <i class="fas fa-check-circle text-green-500 flex-shrink-0"></i>
+                    <span class="flex flex-wrap gap-1">
+                        <?php foreach ($plan['allowed_mime_types'] as $type): ?>
+                            <span class="inline-block px-1.5 py-0.5 rounded text-xs bg-gray-100 text-gray-600 font-mono">.<?= htmlspecialchars($type) ?></span>
+                        <?php endforeach; ?>
+                    </span>
+                </li>
+                <?php endif; ?>
                 <?php if ($plan['slug'] !== 'free' && $plan['slug'] !== 'business'): ?>
                     <li class="flex items-center gap-2">
                         <i class="fas fa-check-circle text-green-500"></i>
