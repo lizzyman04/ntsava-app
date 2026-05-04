@@ -45,6 +45,8 @@ class PageController extends Controller
                 'price_usd' => $priceUSD,
                 'storage_gb' => $plan->getStorageLimitBytes() > 0 ? round($plan->getStorageLimitBytes() / 1073741824, 2) : 'Unlimited',
                 'bandwidth_gb' => $plan->getBandwidthLimitBytes() > 0 ? round($plan->getBandwidthLimitBytes() / 1073741824, 2) : 'Unlimited',
+                'max_file_size_bytes' => $plan->getMaxFileSizeBytes(),
+                'allowed_mime_types' => $plan->getAllowedMimeTypes(),
                 'is_popular' => $plan->getSlug() === 'plus',
                 'description' => $plan->getDescription()
             ];
@@ -120,6 +122,8 @@ class PageController extends Controller
                 'is_popular' => $p->getSlug() === 'plus',
                 'storage_gb' => $p->getStorageLimitBytes() > 0 ? round($p->getStorageLimitBytes() / 1073741824, 2) : 'Unlimited',
                 'bandwidth_gb' => $p->getBandwidthLimitBytes() > 0 ? round($p->getBandwidthLimitBytes() / 1073741824, 2) : 'Unlimited',
+                'max_file_size_bytes' => $p->getMaxFileSizeBytes(),
+                'allowed_mime_types' => $p->getAllowedMimeTypes(),
             ];
         }
 
