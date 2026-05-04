@@ -4,7 +4,7 @@
 
 [![PHP Version](https://img.shields.io/badge/PHP-8.1+-777BB4.svg?style=for-the-badge&logo=php&logoColor=white)](https://php.net)
 [![Fluxor Framework](https://img.shields.io/badge/Fluxor-PHP%20Framework-FF2D20.svg?style=for-the-badge)](https://lizzyman04.github.io/fluxor-php/)
-[![License](https://img.shields.io/badge/License-MIT-4CAF50.svg?style=for-the-badge&logo=opensourceinitiative&logoColor=white)](LICENSE)
+[![License](https://img.shields.io/badge/License-AGPL--3.0-4CAF50.svg?style=for-the-badge&logo=opensourceinitiative&logoColor=white)](LICENSE)
 [![CDN Agnostic](https://img.shields.io/badge/CDN-Agnostic-00A98F.svg?style=for-the-badge)](#cdn-integration)
 [![PRs Welcome](https://img.shields.io/badge/PRs-Welcome-7159C1.svg?style=for-the-badge&logo=git&logoColor=white)](https://github.com/lizzyman04/ntsava-app/pulls)
 
@@ -259,7 +259,7 @@ We welcome contributions.
 git checkout -b feature/amazing-feature
 
 # Commit your changes
-git commit -m 'Add amazing feature'
+git commit -m 'feat: add amazing feature'
 
 # Push to the branch
 git push origin feature/amazing-feature
@@ -275,7 +275,7 @@ git push origin feature/amazing-feature
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) file for details.
+GNU Affero General Public License v3.0 - see [LICENSE](LICENSE) file for details.
 
 ---
 
