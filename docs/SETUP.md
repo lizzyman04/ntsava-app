@@ -68,16 +68,13 @@ Optional but recommended:
   - resize.yourdomain.com (dedicated image processor)
 ```
 
-### Database Agnostic Note
+### Supported Databases
 
-Ntsava works with multiple databases. Choose one:
-
-| Database | Version | Connection String Example |
-|----------|---------|--------------------------|
-| MySQL | 5.7+ | `mysql:host=localhost;dbname=ntsava_cdn` |
-| MariaDB | 10.2+ | `mysql:host=localhost;dbname=ntsava_cdn` |
-| PostgreSQL | 12+ | `pgsql:host=localhost;dbname=ntsava_cdn` |
-| SQLite | 3.35+ | `sqlite:/path/to/database.sqlite` (development only) |
+| Database | Version | Notes |
+|----------|---------|-------|
+| MySQL | 5.7+ | Fully supported (production) |
+| MariaDB | 10.2+ | Fully supported (production) |
+| SQLite | 3.35+ | Development only |
 
 ---
 
@@ -116,7 +113,6 @@ composer install
 # Linux/Unix
 chmod -R 755 storage/
 chmod -R 755 public/
-chmod -R 755 bootstrap/cache/
 
 # Set ownership (adjust user/group to your web server user)
 chown -R www-data:www-data storage/
@@ -130,15 +126,11 @@ chmod 775 public/
 ### Step 4: Create Required Directories
 
 ```bash
-# Create storage structure
-mkdir -p storage/cache
+# Create base storage directory
+# Note: storage/cache is auto-created by the image resize service on first use
 mkdir -p storage/u
-mkdir -p storage/temp
 
-# Create log directory
-mkdir -p storage/logs
-
-# Set permissions again
+# Set permissions
 chmod -R 755 storage/
 ```
 
@@ -162,7 +154,6 @@ APP_ENV=production
 APP_DEBUG=false
 APP_PORT=80
 APP_TIMEZONE=UTC
-# APP_KEY=base64:... (generate with: php artisan key:generate)
 
 # Authentication
 # AUTH_SECRET_KEY=
@@ -177,9 +168,9 @@ APP_TIMEZONE=UTC
 # MAIL_FROM_ADDRESS=noreply@example.com
 # MAIL_FROM_NAME="Ntsava App"
 
-# Upload Configuration
-# UPLOAD_MAX_SIZE=5242880
-# UPLOAD_ALLOWED_TYPES=jpg,jpeg,png,gif,webp,pdf,doc,docx
+# Upload Configuration (DEPRECATED)
+# Upload limits are now configured per plan in the database.
+# Run `composer seed` to insert default plan limits.
 ```
 
 Generate secure keys:
@@ -211,42 +202,26 @@ Choose your database:
 **Option A: MySQL / MariaDB**
 
 ```env
-DB_DRIVER=mysql
+DB_CONNECTION=mysql
 DB_HOST=localhost
 DB_PORT=3306
-DB_NAME=ntsava_cdn
-DB_USER=ntsava_user
+DB_DATABASE=ntsava_cdn
+DB_USERNAME=ntsava_user
 DB_PASSWORD=your_secure_password
 ```
 
-**Option B: PostgreSQL**
+**Option B: SQLite (Development Only)**
 
 ```env
-DB_DRIVER=pgsql
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=ntsava_cdn
-DB_USER=ntsava_user
-DB_PASSWORD=your_secure_password
-```
-
-**Option C: SQLite (Development Only)**
-
-```env
-DB_DRIVER=sqlite
+DB_CONNECTION=sqlite
 DB_DATABASE=/absolute/path/to/database.sqlite
 ```
 
-### Step 5: Configure Upload Limits
+### Step 5: Configure Image Processing
+
+Upload limits (max file size and allowed types) are **configured per plan in the database**, not via environment variables. `UPLOAD_MAX_SIZE` and `UPLOAD_ALLOWED_TYPES` are deprecated and have no effect. Run `composer seed` after migrations to populate default plan limits.
 
 ```env
-# Upload limits (in bytes)
-# 100MB = 104857600 bytes
-UPLOAD_MAX_SIZE=104857600
-
-# Allowed file extensions
-UPLOAD_ALLOWED_TYPES=jpg,jpeg,png,gif,webp,mp4,pdf,zip,doc,docx
-
 # Image processing
 IMAGE_QUALITY=85
 IMAGE_MAX_WIDTH=4096
@@ -293,11 +268,11 @@ GRANT ALL ON SCHEMA public TO ntsava_user;
 ### Step 2: Run Migrations
 
 ```bash
-# Run all migrations
+# Run all migrations (Phinx)
 composer migrate
 
-# Or manually execute
-php db/scripts/migrate-all.php
+# Check migration status
+composer migrate:status
 
 # Verify tables were created
 # MySQL:
@@ -320,21 +295,18 @@ Expected tables:
 ### Step 3: Seed Default Data
 
 ```bash
-# Insert default plans (Free, Plus, Pro, Business)
-php db/scripts/seed-plans.php
-
-# Create admin user (interactive)
-php db/scripts/create-admin.php
+# Seed default plans (Free, Plus, Pro, Business)
+composer seed
 ```
 
 ### Default Plans Created
 
-| Plan | Slug | Storage | Bandwidth | Price (MZN) |
-|------|------|---------|-----------|--------------|
-| Free | free | 1 GB | 10 GB | 0 |
-| Plus | plus | 10 GB | 100 GB | 250 |
-| Pro | pro | 100 GB | 1 TB | 500 |
-| Business | business | Unlimited | Unlimited | 2500 |
+| Plan | Slug | Storage | Bandwidth | Max File Size | Allowed Types | Price (MZN) |
+|------|------|---------|-----------|---------------|---------------|-------------|
+| Free | free | 1 GB | 20 GB | 100 MB | jpg, jpeg, png, gif, webp | 0 |
+| Plus | plus | 5 GB | 50 GB | 500 MB | + pdf, doc, docx | 100 |
+| Pro | pro | 50 GB | 200 GB | 1 GB | + zip | 500 |
+| Business | business | Unlimited | Unlimited | 2.5 GB | + mp4, mov | Custom |
 
 ---
 
@@ -729,14 +701,13 @@ systemctl restart varnish
 
 ## Verification
 
-### Test 1: API Health Check
+### Test 1: Application Responds
 
 ```bash
-# Check API is responding
-curl https://api.yourdomain.com/api/v1/health
+# Check the app is responding
+curl -I https://api.yourdomain.com/
 
-# Expected response:
-# {"status":"healthy","timestamp":"2026-04-22T10:00:00Z"}
+# Expected: HTTP/2 200 or 302 (redirect to login)
 ```
 
 ### Test 2: Database Connection

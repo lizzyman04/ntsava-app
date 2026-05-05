@@ -1411,8 +1411,8 @@ echo "==> Recovery completed"
 
 - [ ] Code cloned from repository
 - [ ] Composer install --no-dev --optimize-autoloader
-- [ ] Database migrations run
-- [ ] Default plans seeded
+- [ ] Database migrations run (`composer migrate`)
+- [ ] Default plans seeded (`composer seed`)
 - [ ] Admin user created
 - [ ] Subdomains configured in web server
 - [ ] PHP execution blocked in storage directory
@@ -1421,7 +1421,7 @@ echo "==> Recovery completed"
 
 ### Post-Deployment
 
-- [ ] Health check endpoint returns 200
+- [ ] Application root returns HTTP 200 (`curl -I https://api.yourdomain.com/`)
 - [ ] File upload test passes
 - [ ] CDN cache working
 - [ ] Image resize test passes

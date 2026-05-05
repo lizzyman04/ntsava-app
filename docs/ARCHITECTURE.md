@@ -274,6 +274,7 @@ erDiagram
     USERS {
         bigint id PK
         varchar36 uuid UK
+        varchar100 name
         varchar50 username UK
         varchar255 email UK
         varchar255 password_hash
@@ -282,7 +283,11 @@ erDiagram
         bigint storage_used_bytes
         bigint bandwidth_limit_bytes
         bigint bandwidth_used_bytes
+        int bandwidth_reset_month
         varchar20 status
+        text suspended_reason
+        datetime suspended_at
+        datetime last_login_at
         datetime created_at
         datetime updated_at
     }
@@ -297,8 +302,9 @@ erDiagram
         varchar100 mime_type
         int width
         int height
-        datetime deleted_at
+        int duration_seconds
         datetime created_at
+        datetime deleted_at
     }
 
     API_TOKENS {
@@ -319,10 +325,14 @@ erDiagram
         text description
         bigint storage_limit_bytes
         bigint bandwidth_limit_bytes
+        bigint max_file_size_bytes
+        text allowed_mime_types
         decimal10_2 price
         varchar3 currency
         boolean is_active
         int sort_order
+        datetime created_at
+        datetime updated_at
     }
 
     CREDITS {
@@ -343,6 +353,7 @@ erDiagram
         boolean is_read
         json metadata
         datetime created_at
+        datetime read_at
     }
 ```
 
@@ -372,10 +383,17 @@ Ntsava uses Cycle ORM which provides database abstraction. The same code works o
 | PostgreSQL | 12+ | Yes | Yes |
 | SQLite | 3.35+ | Yes | Development only |
 
-**No vendor-specific SQL** - all queries use ORM methods:
+**Configured drivers** (`db/core/connection.php`):
+
+| Database | Version | Tested | Production Ready |
+|----------|---------|--------|------------------|
+| MySQL | 5.7+ | Yes | Yes |
+| MariaDB | 10.2+ | Yes | Yes |
+| SQLite | 3.35+ | Yes | Development only |
+
+All queries use ORM methods — no vendor-specific SQL:
 
 ```php
-// Works on any supported database
 $users = ORMHelper::getRepository(User::class)
     ->findAll(['status' => 'active']);
 
@@ -485,16 +503,11 @@ graph TB
 | API Responses | No cache | No cache | No cache | N/A |
 | HTML pages | 1 hour | 1 hour | 1 hour | 5 minutes |
 
-### Cache Invalidation Triggers
+### Cache Invalidation
 
-```php
-// Automatic cache purge occurs on:
-1. File deletion (purge single URL)
-2. File replacement (same path, new content)
-3. User account deletion (purge all user files)
-4. Admin manual purge (via dashboard or API)
-5. Scheduled cleanup (old resized images, 7 days TTL)
-```
+**CDN edge cache:** Governed by `Cache-Control: public, max-age=31536000, immutable` headers set in `storage/.htaccess`. No programmatic CDN purge is implemented. Stale content is avoided by appending a 6-character random suffix to every uploaded filename (e.g., `photo_a1b2c3.jpg`), so each upload gets a unique URL.
+
+**Resize cache (`storage/cache/`):** Automatically pruned on each `ResizeService` instantiation — any cached file older than 7 days is deleted before serving new requests.
 
 ## Scalability Patterns
 
@@ -604,44 +617,20 @@ Infrastructure Metrics:
   - Network throughput (inbound/outbound)
 ```
 
-### Health Check Endpoint
+### Health Verification
 
-```php
-// GET /api/v1/health - System health status
-{
-    "status": "healthy",
-    "timestamp": "2026-04-22T10:00:00Z",
-    "version": "1.0.0",
-    "components": {
-        "database": {
-            "status": "connected",
-            "latency_ms": 4,
-            "connections": 12
-        },
-        "storage": {
-            "status": "writable",
-            "free_space_gb": 450,
-            "total_files": 125000
-        },
-        "cache": {
-            "status": "connected",
-            "hit_ratio": 0.94,
-            "memory_usage_mb": 2048
-        },
-        "cdn": {
-            "status": "active",
-            "provider": "cloudflare",
-            "pops": 300,
-            "cache_hit_ratio": 0.92
-        }
-    },
-    "metrics": {
-        "uptime_seconds": 86400,
-        "requests_today": 1250000,
-        "requests_this_hour": 52000,
-        "avg_response_time_ms": 45
-    }
-}
+There is no dedicated `/api/v1/health` endpoint. To verify the application is up, send a request to the root and confirm an HTTP 200 response:
+
+```bash
+curl -I https://api.yourdomain.com/
+# Expected: HTTP/2 200
+```
+
+To verify database connectivity directly:
+
+```bash
+php -r "new PDO('mysql:host=localhost;dbname=ntsava_cdn', 'user', 'pass');"
+echo $?  # 0 = success
 ```
 
 ## Best Practices

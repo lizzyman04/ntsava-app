@@ -1,0 +1,28 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^ - [R=404,L]
+</IfModule>
+
+<FilesMatch "\.(php|phtml|php3|php4|php5|php7|phar|inc)$">
+    Require all denied
+</FilesMatch>
+
+<FilesMatch "(composer\.json|composer\.lock|\.env|\.gitignore|\.htaccess)$">
+    Require all denied
+</FilesMatch>
+
+<IfModule mod_headers.c>
+    Header set Cache-Control "public, max-age=31536000, immutable"
+    Header set Access-Control-Allow-Origin "*"
+    Header unset ETag
+    FileETag None
+</IfModule>
+
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json image/svg+xml
+</IfModule>
+
+Options -Indexes -MultiViews

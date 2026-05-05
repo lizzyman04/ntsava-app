@@ -80,8 +80,11 @@ composer install
 cp .env.example .env
 nano .env  # Add your database and domain settings
 
-# Run database migrations
+# Run database migrations (Phinx)
 composer migrate
+
+# Seed default plans into the database
+composer seed
 
 # Set up subdomains in your hosting panel
 # - cdn.yourdomain.com -> /storage
@@ -205,7 +208,7 @@ Key tables:
   - users: UUID, email, plan_id, storage_used_bytes, bandwidth_used_bytes
   - files: user_id, uuid, storage_path, size_bytes, mime_type, deleted_at
   - api_tokens: user_id, token_hash, permissions, expires_at
-  - plans: slug, storage_limit_bytes, bandwidth_limit_bytes, price
+  - plans: slug, storage_limit_bytes, bandwidth_limit_bytes, max_file_size_bytes, allowed_mime_types, price
 ```
 
 ## Examples
@@ -228,7 +231,9 @@ Response:
     "url": "https://cdn.yourdomain.com/u/johndoe/gallery/2026/image_a1b2c3.jpg",
     "uuid": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
     "size": 245760,
-    "mime": "image/jpeg"
+    "size_mb": 0.23,
+    "mime": "image/jpeg",
+    "path": "gallery/2026/image_a1b2c3.jpg"
   }
 }
 ```

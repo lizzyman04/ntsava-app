@@ -31,13 +31,12 @@ storage/*.log
 storage/logs/*.log
 
 # Cache
-storage/framework/cache/*
-storage/framework/sessions/*
-storage/framework/views/*
-!storage/cache/.gitkeep
+storage/cache/*
+storage/sessions/*
+!storage/u/.gitignore
 !storage/logs/.gitkeep
+!storage/cache/.gitkeep
 !storage/sessions/.gitkeep
-!storage/framework/.gitkeep
 
 # Tests
 tests/coverage/
