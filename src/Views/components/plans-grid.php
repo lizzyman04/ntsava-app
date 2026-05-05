@@ -74,12 +74,13 @@ if (!function_exists('format_file_size')) {
                 </li>
                 <?php endif; ?>
                 <?php if (!empty($plan['allowed_mime_types'])): ?>
-                <li class="flex items-center gap-2 flex-wrap">
+                <li class="flex items-center gap-2">
                     <i class="fas fa-check-circle text-green-500 flex-shrink-0"></i>
-                    <span class="flex flex-wrap gap-1">
-                        <?php foreach ($plan['allowed_mime_types'] as $type): ?>
-                            <span class="inline-block px-1.5 py-0.5 rounded text-xs bg-gray-100 text-gray-600 font-mono">.<?= htmlspecialchars($type) ?></span>
-                        <?php endforeach; ?>
+                    <span class="flex items-center gap-1.5">
+                        Supports <?= count($plan['allowed_mime_types']) ?> file type<?= count($plan['allowed_mime_types']) !== 1 ? 's' : '' ?>
+                        <i class="fas fa-info-circle text-gray-400 text-sm"
+                           onmouseenter="showFtTip(this,'<?= htmlspecialchars(implode(', ', array_map(fn($t) => '.' . $t, $plan['allowed_mime_types'])), ENT_QUOTES) ?>')"
+                           onmouseleave="hideFtTip()"></i>
                     </span>
                 </li>
                 <?php endif; ?>
@@ -111,3 +112,21 @@ if (!function_exists('format_file_size')) {
         </div>
     <?php endforeach; ?>
 </div>
+<script>
+(function () {
+    var tip = document.createElement('span');
+    tip.style.cssText = 'display:none;position:fixed;background:#1f2937;color:#fff;font-size:0.75rem;border-radius:4px;padding:4px 10px;white-space:nowrap;z-index:9999;box-shadow:0 4px 6px rgba(0,0,0,.18);pointer-events:none;transform:translateX(-50%);';
+    document.body.appendChild(tip);
+    window._ftTip = tip;
+})();
+function showFtTip(el, text) {
+    var tip = window._ftTip;
+    tip.textContent = text;
+    tip.style.top = '-9999px';
+    tip.style.display = 'block';
+    var r = el.getBoundingClientRect();
+    tip.style.left = (r.left + r.width / 2) + 'px';
+    tip.style.top  = (r.top - tip.offsetHeight - 8) + 'px';
+}
+function hideFtTip() { window._ftTip.style.display = 'none'; }
+</script>

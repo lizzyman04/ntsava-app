@@ -56,7 +56,7 @@ class DefaultPlansSeeder extends AbstractSeed
                 'description' => 'Sob consulta. Entre em contato para um plano personalizado.',
                 'storage_limit_bytes' => 0,
                 'bandwidth_limit_bytes' => 0,
-                'max_file_size_bytes' => 2684354560,
+                'max_file_size_bytes' => 53687091200,
                 'allowed_mime_types' => '["jpg","jpeg","png","gif","webp","pdf","doc","docx","zip","mp4","mov"]',
                 'price' => '0.00',
                 'currency' => 'MZN',
