@@ -115,7 +115,7 @@ if (!function_exists('format_file_size')) {
 <script>
 (function () {
     var tip = document.createElement('span');
-    tip.style.cssText = 'display:none;position:fixed;background:#1f2937;color:#fff;font-size:0.75rem;border-radius:4px;padding:4px 10px;white-space:nowrap;z-index:9999;box-shadow:0 4px 6px rgba(0,0,0,.18);pointer-events:none;transform:translateX(-50%);';
+    tip.style.cssText = 'display:none;position:fixed;background:#1f2937;color:#fff;font-size:0.75rem;border-radius:4px;padding:4px 10px;white-space:normal;max-width:300px;word-break:break-word;text-align:center;z-index:9999;box-shadow:0 4px 6px rgba(0,0,0,.18);pointer-events:none;transform:translateX(-50%);';
     document.body.appendChild(tip);
     window._ftTip = tip;
 })();
